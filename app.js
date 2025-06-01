@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ... (other variables remain the same) ...
     const parksDropdown = document.getElementById('parksDropdown');
     const loadTimesButton = document.getElementById('loadTimesButton');
     const timesContainer = document.getElementById('timesContainer');
@@ -7,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorDisplay = document.getElementById('errorDisplay');
 
     const API_BASE_URL = 'https://queue-times.com/en-US';
+    const PROXY_URL = 'https://corsproxy.io/?url='; // Define the proxy URL
 
     // Function to show loading state
     function showLoading(isLoading) {
@@ -26,9 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchParks() {
         showLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/parks.json`);
+            // Prepend the PROXY_URL to your API endpoint
+            const response = await fetch(`${PROXY_URL}${API_BASE_URL}/parks.json`);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status} - Could not fetch parks.`);
+                // Try to get more specific error info if possible
+                let errorText = `HTTP error! Status: ${response.status}`;
+                try {
+                    const errorData = await response.json(); // Or .text() if not JSON
+                    errorText += ` - ${errorData.message || JSON.stringify(errorData)}`;
+                } catch (e) { /* Ignore if response body can't be parsed */ }
+                throw new Error(errorText + ` - Could not fetch parks via proxy.`);
             }
             const parks = await response.json();
 
@@ -58,12 +67,19 @@ document.addEventListener('DOMContentLoaded', () => {
         parkNameHeader.textContent = `Wait Times for ${parkName}`;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/parks/${parkId}/queue_times.json`);
+            // Prepend the PROXY_URL to your API endpoint
+            const response = await fetch(`${PROXY_URL}${API_BASE_URL}/parks/${parkId}/queue_times.json`);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status} - Could not fetch queue times.`);
+                let errorText = `HTTP error! Status: ${response.status}`;
+                try {
+                    const errorData = await response.json(); // Or .text() if not JSON
+                    errorText += ` - ${errorData.message || JSON.stringify(errorData)}`;
+                } catch (e) { /* Ignore if response body can't be parsed */ }
+                throw new Error(errorText + ` - Could not fetch queue times via proxy.`);
             }
             const data = await response.json();
 
+            // ... (the rest of your fetchQueueTimes function remains the same to display data) ...
             timesContainer.innerHTML = ''; // Clear previous content
 
             if (data.lands && data.lands.length > 0) {
@@ -142,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Event Listeners
+    // Event Listeners (remain the same)
     parksDropdown.addEventListener('change', () => {
         if (parksDropdown.value) {
             loadTimesButton.disabled = false;
