@@ -19,7 +19,8 @@
                     <div id="parkButtonsContainer" class="park-buttons">
                         </div>
                 </nav>
-                <hr class="header-divider"> {/* Optional: visual separator */}
+                <hr class="header-divider"> {/* Added for separation */}
+
                 <div class="header-content">
                     <h1 class="park-title">
                         <span id="currentParkNameElement" class="park-name">Loading Park...</span>
@@ -27,7 +28,7 @@
                     </h1>
                     <div class="header-controls">
                         <button id="refresh-btn" class="btn btn--secondary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"  aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="23 4 23 10 17 10"></polyline>
                                 <polyline points="1 20 1 14 7 14"></polyline>
                                 <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -55,7 +56,7 @@
                 </div>
 
                 <div id="error-state" class="error-state hidden">
-                    <div class="error-icon"  aria-hidden="true">⚠️</div>
+                    <div class="error-icon" aria-hidden="true">⚠️</div> {/* Ensured aria-hidden for decorative icon */}
                     <h3>Unable to load wait times</h3>
                     <p id="error-message">Please check your connection and try again.</p>
                     <button id="retry-btn" class="btn btn--primary">Try Again</button>
@@ -81,13 +82,14 @@
                                 <span class="legend-color legend-color--very-high"></span>
                                 <span>76+ min</span>
                             </div>
-                             <div class="legend-item">
+                            {/* Added a legend item for closed/N/A based on your style.css */}
+                            <div class="legend-item">
                                 <span class="legend-color legend-color--closed"></span>
                                 <span>Closed/N/A</span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div id="themed-areas" class="themed-areas">
                         </div>
                 </div>
