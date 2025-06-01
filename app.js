@@ -1,63 +1,57 @@
 // Universal Parks Wait Times Application (Refactored from EpicUniverseWaitTimes)
-class ParkWaitTimesApp {
+class ParkWaitTimesApp { // Renamed class
     constructor() {
+        // Updated to the three specified parks
         this.supportedParks = [
-            { id: 334, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" }, // Verify ID for Epic Universe
+            { id: 64, name: "Islands of Adventure", shortName: "IoA", themedAreasConfigKey: "ioa" },
             { id: 65, name: "Universal Studios Florida", shortName: "USF", themedAreasConfigKey: "usf" },
-            { id: 66, name: "Universal Studios Hollywood", shortName: "USH", themedAreasConfigKey: "ush" }
+            { id: 334, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" } // Verify ID
         ];
 
-        // Original themedAreas, now used for potential color/name overrides if API land matches
-        // The 'attractions' array within these will NOT be used to filter rides.
-        // We display all rides from the API.
+        // parkLandConfigs: Used for potential color/name overrides if API land matches.
+        // Keys should be lowercase API land names for matching.
         this.parkLandConfigs = {
-            'epic_universe': { // Key matches themedAreasConfigKey
-                'celestial park': { color: '#4A90E2', displayName: 'Celestial Park' }, // API land names are keys, lowercased
+            'epic_universe': { // Park ID 334
+                'celestial park': { color: '#4A90E2', displayName: 'Celestial Park' },
                 'dark universe': { color: '#8B0000', displayName: 'Dark Universe' },
                 'how to train your dragon — isle of berk': { color: '#228B22', displayName: 'How to Train Your Dragon — Isle of Berk' },
-                'super nintendo world': { color: '#FF4500', displayName: 'SUPER NINTENDO WORLD' }, // API name for USF is all caps
+                'super nintendo world': { color: '#FF4500', displayName: 'SUPER NINTENDO WORLD' },
                 'the wizarding world of harry potter — ministry of magic': { color: '#800080', displayName: 'The Wizarding World of Harry Potter — Ministry of Magic' }
             },
-            'usf': { // Universal Studios Florida - Park ID 65
+            'usf': { // Park ID 65 (Universal Studios Florida)
                 'dreamworks land': { color: '#0078D4', displayName: 'DreamWorks Land' },
                 'hollywood': { color: '#FFD700', displayName: 'Hollywood' },
                 'illumination\'s minion land': { color: '#FCE205', displayName: 'Illumination\'s Minion Land' },
                 'new york': { color: '#C0C0C0', displayName: 'New York' },
                 'production central': { color: '#E43F3F', displayName: 'Production Central' },
                 'san francisco': { color: '#50A6C2', displayName: 'San Francisco' },
-                'the wizarding world of harry potter - diagon alley': { color: '#4D2B7F', displayName: 'The Wizarding World of Harry Potter - Diagon Alley' },
+                'the wizarding world of harry potter - diagon alley': { color: '#4D2B7F', displayName: 'The Wizarding World of Harry Potter - Diagon Alley' }, // Note hyphen vs em-dash
                 'world expo': { color: '#00A86B', displayName: 'World Expo' }
             },
-            'ush': { // Universal Studios Hollywood - Park ID 66
-                'jurassic world': { color: '#006400', displayName: 'Jurassic World' },
-                'lower lot': { color: '#808080', displayName: 'Lower Lot' }, // Generic color
-                'minion land': { color: '#FCE205', displayName: 'Minion Land' }, // Different from USF's Minion Land name
-                'production plaza': { color: '#D2691E', displayName: 'Production Plaza' },
-                'springfield, u.s.a.': { color: '#FFD700', displayName: 'Springfield, U.S.A.' }, // Note the dots
-                'super nintendo world': { color: '#FF4500', displayName: 'SUPER NINTENDO WORLD' }, // Same as Epic if API name matches
-                'the wizarding world of harry potter': { color: '#4D2B7F', displayName: 'The Wizarding World of Harry Potter' }, // Different from USF/Epic
-                'transformers metrobase': { color: '#4682B4', displayName: 'TRANSFORMERS Metrobase' },
-                'upper lot': { color: '#A9A9A9', displayName: 'Upper Lot' } // Generic color
+            'ioa': { // Park ID 64 (Islands of Adventure) - Add land configs based on its JSON
+                'jurassic park': { color: '#2E8B57', displayName: 'Jurassic Park' },
+                'marvel super hero island': { color: '#B22222', displayName: 'Marvel Super Hero Island' },
+                'seuss landing': { color: '#FF69B4', displayName: 'Seuss Landing' },
+                'the wizarding world of harry potter - hogsmeade': { color: '#3A2A78', displayName: 'The Wizarding World of Harry Potter - Hogsmeade' }, // Note hyphen
+                'toon lagoon': { color: '#1E90FF', displayName: 'Toon Lagoon' },
+                // 'lost continent': { color: '#DAA520', displayName: 'The Lost Continent' } // Example if it were there
             }
-            // Add more configs if needed
         };
 
-        this.currentParkId = this.supportedParks[0].id;
+        this.currentParkId = this.supportedParks[0].id; // Default to Islands of Adventure (ID 64)
         this.currentParkMeta = this.supportedParks.find(p => p.id === this.currentParkId);
 
         this.apiConfig = {
             proxyUrl: 'https://corsproxy.io/?url=',
-            // baseUrl will be constructed dynamically in fetchWaitTimes
         };
         
-        this.waitTimeData = { lands: [] }; // Will store API structure: { lands: [{name, rides:[]}] }
+        this.waitTimeData = { lands: [] };
         this.lastUpdated = null;
         this.autoRefreshInterval = null;
         this.countdownInterval = null;
-        this.autoRefreshTime = 5 * 60 * 1000; // 5 minutes
+        this.autoRefreshTime = 5 * 60 * 1000;
         this.isLoading = false;
 
-        // DOM Elements
         this.elements = {
             parkButtonsContainer: document.getElementById('parkButtonsContainer'),
             currentParkNameElement: document.getElementById('currentParkNameElement'),
@@ -69,17 +63,30 @@ class ParkWaitTimesApp {
             errorState: document.getElementById('error-state'),
             errorMessage: document.getElementById('error-message'),
             content: document.getElementById('content'),
-            themedAreasContainer: document.getElementById('themed-areas') // This is where lands will be rendered
+            themedAreasContainer: document.getElementById('themed-areas')
         };
         
         this.init();
     }
     
+    // ... (init, createParkButtons, updateParkTitle, switchPark, bindCoreEventListeners methods remain the same as the previous complete refined version) ...
+    // ... (fetchWaitTimes remains largely the same, ensuring it uses this.currentParkId) ...
+    // ... (structureApiDataForDisplay needs to correctly use this.parkLandConfigs with this.currentParkMeta.themedAreasConfigKey) ...
+    // ... (getWaitTimeClass, formatWaitTime remain the same) ...
+    // ... (renderWaitTimes, createThemedAreaElement, createAttractionCard need to use the land's configured color if available) ...
+    // ... (UI state methods, updateLastUpdatedDisplay, startAutoRefresh, startCountdown remain the same) ...
+    
+    // --- Ensure methods from previous full refactor are here ---
+    // (Copying the relevant methods from the most complete version I provided for the class-based approach,
+    // then making sure they use the new parkLandConfigs structure correctly)
+
     init() {
         this.createParkButtons();
-        this.bindCoreEventListeners(); // Renamed from bindEventListeners
-        this.updateParkTitle();
-        this.fetchWaitTimes(); 
+        this.bindCoreEventListeners();
+        this.updateParkTitle(); // Call after currentParkMeta is set
+        if (this.currentParkId) { // Ensure a park is selected before fetching
+            this.fetchWaitTimes();
+        }
         this.startAutoRefresh();
     }
 
@@ -89,15 +96,12 @@ class ParkWaitTimesApp {
 
         this.supportedParks.forEach(park => {
             const button = document.createElement('button');
-            // Use a generic 'btn' and your specific 'btn--nav' if you added it to style.css
             button.className = 'btn btn--nav'; 
             button.dataset.parkId = park.id;
             button.textContent = park.shortName || park.name;
             if (park.id === this.currentParkId) {
                 button.classList.add('active');
             }
-            // Important: Clone button or remove old listeners if this function can be called multiple times
-            // For now, assuming it's called once at init. If park list could change, this needs care.
             button.addEventListener('click', () => this.switchPark(park.id));
             this.elements.parkButtonsContainer.appendChild(button);
         });
@@ -125,11 +129,11 @@ class ParkWaitTimesApp {
             }
         });
 
-        this.fetchWaitTimes(true); // Force fetch for new park
+        this.fetchWaitTimes(true); 
         this.startAutoRefresh(); 
     }
     
-    bindCoreEventListeners() { // Renamed to avoid confusion with button listeners if re-created
+    bindCoreEventListeners() { 
         if (this.elements.refreshBtn) {
             this.elements.refreshBtn.addEventListener('click', () => this.fetchWaitTimes(true));
         }
@@ -139,13 +143,17 @@ class ParkWaitTimesApp {
     }
     
     async fetchWaitTimes(isManualRefresh = false) {
+        if (!this.currentParkId) {
+            this.showErrorState("No park selected.");
+            this.isLoading = false; // Reset loading state
+            return;
+        }
         if (this.isLoading && !isManualRefresh) return;
         this.isLoading = true;
         this.showLoadingState();
-        console.log(`Fetching wait times for park ID: ${this.currentParkId}`);
+        console.log(`Fetching wait times for park ID: ${this.currentParkId}...`);
         
         try {
-            // Construct baseUrl dynamically
             const parkApiUrl = `https://queue-times.com/en-US/parks/${this.currentParkId}/queue_times.json`;
             const proxiedUrl = this.apiConfig.proxyUrl + encodeURIComponent(parkApiUrl);
             console.log('Requesting URL:', proxiedUrl);
@@ -154,78 +162,70 @@ class ParkWaitTimesApp {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                let errorDetails = `HTTP error! status: ${response.status} ${response.statusText}`; // Added statusText
+                let errorDetails = `HTTP error! status: ${response.status} ${response.statusText}`;
                 try {
-                    const errorBody = await response.text(); // Read as text first
+                    const errorBody = await response.text(); 
                     console.error('Error response body:', errorBody);
                     try {
-                        const errorJson = JSON.parse(errorBody); // Try to parse as JSON
+                        const errorJson = JSON.parse(errorBody); 
                         errorDetails += ` - ${errorJson.message || JSON.stringify(errorJson)}`;
                     } catch (e) {
-                        errorDetails += ` - ${errorBody.substring(0, 100)}...`; // Add snippet if not JSON
+                        errorDetails += ` - ${errorBody.substring(0, 100)}...`; 
                     }
-                } catch (e) { /* ignore if error response body can't be read */ }
+                } catch (e) { /* ignore */ }
                 throw new Error(errorDetails);
             }
             
-            const apiData = await response.json(); // API returns JSON
+            const apiData = await response.json(); 
             console.log('API Data Received:', apiData);
             
-            this.waitTimeData = this.structureApiDataForDisplay(apiData); // New processing method
+            this.waitTimeData = this.structureApiDataForDisplay(apiData); 
             console.log('Structured Data for Rendering:', this.waitTimeData);
             
             this.lastUpdated = new Date();
             this.updateLastUpdatedDisplay();
-            this.renderWaitTimes(); // Render based on the new dynamic structure
+            this.renderWaitTimes(); 
             this.showContent();
             
         } catch (error) {
             console.error('Error fetching wait times:', error);
             this.showErrorState(error.message);
         } finally {
-            this.isLoading = false; // Ensure isLoading is reset
-            // showLoadingState hides content and error, showContent or showErrorState reveals one.
-            // We don't need hideLoadingState here if showContent/showErrorState is always called.
+            this.isLoading = false; 
         }
     }
     
-    // Renamed and repurposed from processRealApiData
-    // This method now takes raw API data and structures it for rendering.
-    // It doesn't rely on this.themedAreas for ride lists, only for potential color overrides.
     structureApiDataForDisplay(apiData) {
         const displayData = { lands: [] };
         const processedRideIds = new Set();
-        const currentParkLandConfig = this.parkLandConfigs[this.currentParkMeta.themedAreasConfigKey] || {};
+        // Get the land configuration for the current park
+        const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
+        const currentParkLandConfig = currentParkConfigKey ? (this.parkLandConfigs[currentParkConfigKey] || {}) : {};
 
-        // 1. Process rides nested under lands from API
         if (apiData.lands && Array.isArray(apiData.lands)) {
             apiData.lands.forEach(landFromApi => {
-                const landConfig = currentParkLandConfig[landFromApi.name.trim().toLowerCase()] || {};
+                // Match land by its name (lowercase) to get configured color/displayName
+                const apiLandNameLower = landFromApi.name.trim().toLowerCase();
+                const landConfig = currentParkLandConfig[apiLandNameLower] || {};
+                
                 const currentLand = {
                     name: landConfig.displayName || landFromApi.name || 'Unnamed Land',
-                    color: landConfig.color, // Get color from our config if available
+                    color: landConfig.color, // Use configured color
                     rides: []
                 };
 
                 if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
                     landFromApi.rides.forEach(rideFromApi => {
-                        if (rideFromApi.id && !processedRideIds.has(rideFromApi.id)) {
+                        const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+                        if (!processedRideIds.has(rideId)) {
                             currentLand.rides.push({
-                                id: rideFromApi.id,
-                                name: rideFromApi.name,
-                                waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
-                                isOpen: rideFromApi.is_open === true, // Be explicit
-                                lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
-                            });
-                            processedRideIds.add(rideFromApi.id);
-                        } else if (!rideFromApi.id) { // Handle rides without an ID
-                             currentLand.rides.push({
-                                id: `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`,
+                                id: rideId,
                                 name: rideFromApi.name,
                                 waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
                                 isOpen: rideFromApi.is_open === true,
                                 lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
                             });
+                            processedRideIds.add(rideId);
                         }
                     });
                 }
@@ -235,40 +235,32 @@ class ParkWaitTimesApp {
             });
         }
 
-        // 2. Process rides from the root apiData.rides array (for parks like USH)
         let unlandedRides = [];
         if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) {
             apiData.rides.forEach(rideFromApi => {
-                if (rideFromApi.id && !processedRideIds.has(rideFromApi.id)) {
+                const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+                if (!processedRideIds.has(rideId)) {
                     unlandedRides.push({
-                        id: rideFromApi.id,
+                        id: rideId,
                         name: rideFromApi.name,
                         waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
                         isOpen: rideFromApi.is_open === true,
                         lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
                     });
-                    processedRideIds.add(rideFromApi.id);
-                } else if (!rideFromApi.id) {
-                    unlandedRides.push({
-                         id: `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`,
-                        name: rideFromApi.name,
-                        waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
-                        isOpen: rideFromApi.is_open === true,
-                        lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
-                    });
+                    processedRideIds.add(rideId);
                 }
             });
         }
         if (unlandedRides.length > 0) {
-             const unlandedConfig = currentParkLandConfig['other attractions / events'] || {};
+            const unlandedConfigKey = 'other attractions / events'; // A generic key
+            const unlandedConfig = currentParkLandConfig[unlandedConfigKey] || {};
             displayData.lands.push({ 
-                name: unlandedConfig.displayName || "Other Attractions / Events", 
-                color: unlandedConfig.color,
+                name: unlandedConfig.displayName || "Other Attractions", 
+                color: unlandedConfig.color, // Use configured color if you add one for this generic category
                 rides: unlandedRides 
             });
         }
         
-        // Sort lands by name, then rides within each land by name
         displayData.lands.sort((a, b) => a.name.localeCompare(b.name));
         displayData.lands.forEach(land => {
             land.rides.sort((a, b) => a.name.localeCompare(b.name));
@@ -277,18 +269,19 @@ class ParkWaitTimesApp {
         return displayData;
     }
     
-    getWaitTimeClass(waitTime, isOpen) { // isOpen is now a boolean
+    getWaitTimeClass(waitTime, isOpen) { 
         if (!isOpen) return 'closed';
-        if (waitTime === null) return 'unknown'; // For N/A when open
+        if (waitTime === null) return 'unknown'; 
         if (waitTime <= 20) return 'low';
         if (waitTime <= 45) return 'medium';
         if (waitTime <= 75) return 'high';
         return 'very-high';
     }
     
-    formatWaitTime(waitTime, isOpen) { // isOpen is now a boolean
+    formatWaitTime(waitTime, isOpen) { 
         if (!isOpen) return 'CLOSED';
         if (waitTime === null) return 'N/A';
+        if (waitTime === 0) return 'Walk On'; // Added "Walk On"
         return `${waitTime} min`;
     }
     
@@ -306,8 +299,9 @@ class ParkWaitTimesApp {
         }
 
         this.waitTimeData.lands.forEach(landData => {
-            // Use landData.name to generate a key for CSS classes
-            const areaKey = landData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            const areaKey = landData.name.toLowerCase()
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/[^a-z0-9-]/g, ''); // Remove non-alphanumeric characters except hyphens
             const areaElement = this.createThemedAreaElement(areaKey, landData);
             container.appendChild(areaElement);
         });
@@ -316,11 +310,12 @@ class ParkWaitTimesApp {
     createThemedAreaElement(areaKey, landData) {
         const areaDiv = document.createElement('div');
         areaDiv.className = `themed-area themed-area--${areaKey}`;
-        // Apply border color if defined in parkLandConfigs
         if (landData.color) {
             areaDiv.style.borderColor = landData.color;
         } else {
-            areaDiv.style.borderColor = 'rgba(255, 255, 255, 0.2)'; // Default border
+            // Fallback border color if not specified in config (matches your CSS for Epic)
+            // You can also define a default in CSS for .themed-area
+            areaDiv.style.borderColor = 'rgba(255, 255, 255, 0.2)'; 
         }
         
         const headerDiv = document.createElement('div');
@@ -329,14 +324,14 @@ class ParkWaitTimesApp {
         const iconDiv = document.createElement('div');
         iconDiv.className = 'area-icon';
         if (landData.color) {
-            iconDiv.style.backgroundColor = landData.color; // Use configured color for icon
+            iconDiv.style.backgroundColor = landData.color; 
         } else {
-             iconDiv.style.backgroundColor = 'var(--color-text-secondary)'; // Default icon color
+             iconDiv.style.backgroundColor = 'var(--color-text-secondary)';
         }
         
         const titleH2 = document.createElement('h2');
         titleH2.className = 'area-title';
-        titleH2.textContent = landData.name; // Already contains display name
+        titleH2.textContent = landData.name; 
         
         headerDiv.appendChild(iconDiv);
         headerDiv.appendChild(titleH2);
@@ -352,7 +347,7 @@ class ParkWaitTimesApp {
         } else {
             const noRidesMsg = document.createElement('p');
             noRidesMsg.textContent = 'No specific ride data in this area currently.';
-            noRidesMsg.className = 'no-rides-in-area-message'; // Add style for this
+            noRidesMsg.className = 'no-rides-in-area-message';
             attractionsGrid.appendChild(noRidesMsg);
         }
         
@@ -364,8 +359,8 @@ class ParkWaitTimesApp {
     createAttractionCard(rideData) {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'attraction-card';
-         if (!rideData.isOpen) { // Add class if closed
-            cardDiv.classList.add('attraction-card--closed');
+         if (!rideData.isOpen) {
+            cardDiv.classList.add('attraction-card--closed'); // Add a class for specific styling
         }
         
         const headerDiv = document.createElement('div');
@@ -387,28 +382,28 @@ class ParkWaitTimesApp {
         statusDiv.className = 'attraction-status';
         
         const statusIndicator = document.createElement('div');
-        // Use isOpen directly for status class
         const statusClass = rideData.isOpen ? 'open' : 'closed'; 
-        if (rideData.isOpen && rideData.waitTime === null) statusIndicator.classList.add('status-indicator--unknown');
         statusIndicator.className = `status-indicator status-indicator--${statusClass}`;
+        if (rideData.isOpen && rideData.waitTime === null) { // Add unknown class if open but wait time is N/A
+            statusIndicator.classList.remove(`status-indicator--${statusClass}`); // remove open/closed
+            statusIndicator.classList.add('status-indicator--unknown');
+        }
         
         const statusDot = document.createElement('span');
         statusDot.className = 'status-dot';
         
         const statusText = document.createElement('span');
-        statusText.className = 'status-text'; // Added for consistency
+        statusText.className = 'status-text'; 
         statusText.textContent = rideData.isOpen ? 'Open' : 'Closed';
         if (rideData.isOpen && rideData.waitTime === null) statusText.textContent = 'N/A';
-
-
+        
         statusIndicator.appendChild(statusDot);
         statusIndicator.appendChild(statusText);
         statusDiv.appendChild(statusIndicator);
         
-        // Display last_updated from API for each ride
-        if (rideData.lastUpdated) { // Show if available
+        if (rideData.lastUpdated) { 
             const lastUpdatedRideSpan = document.createElement('span');
-            lastUpdatedRideSpan.className = 'ride-last-updated'; // Add CSS for this
+            lastUpdatedRideSpan.className = 'ride-last-updated'; 
             lastUpdatedRideSpan.textContent = `Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
             statusDiv.appendChild(lastUpdatedRideSpan);
         }
@@ -447,9 +442,8 @@ class ParkWaitTimesApp {
     updateLastUpdatedDisplay() {
         if (this.elements.lastUpdatedDisplay && this.lastUpdated) {
             const timeString = this.lastUpdated.toLocaleTimeString('en-US', {
-                hour: 'numeric', // '2-digit'
+                hour: 'numeric', 
                 minute: '2-digit'
-                // Omitting seconds for brevity, as in original request's app.js
             });
             this.elements.lastUpdatedDisplay.textContent = timeString;
         }
@@ -460,7 +454,7 @@ class ParkWaitTimesApp {
         if (this.countdownInterval) clearInterval(this.countdownInterval);
         
         this.autoRefreshInterval = setInterval(() => {
-            if (!this.isLoading && document.visibilityState === 'visible') { // Only refresh if visible
+            if (!this.isLoading && document.visibilityState === 'visible' && this.currentParkId) { 
                 console.log(`Auto-refreshing wait times for park ID: ${this.currentParkId}`);
                 this.fetchWaitTimes();
             }
@@ -471,8 +465,8 @@ class ParkWaitTimesApp {
     startCountdown() {
         let timeLeft = this.autoRefreshTime / 1000;
         const updateCountdown = () => {
-            if (timeLeft <= 0) {
-                timeLeft = this.autoRefreshTime / 1000; // Reset
+            if (timeLeft < 0) { // Check if less than 0 to prevent briefly showing negative
+                 timeLeft = this.autoRefreshTime / 1000; 
             }
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -482,12 +476,11 @@ class ParkWaitTimesApp {
             }
             timeLeft--;
         };
-        updateCountdown(); // Call immediately
+        updateCountdown(); 
         this.countdownInterval = setInterval(updateCountdown, 1000);
     }
 }
 
-// Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new ParkWaitTimesApp(); // Changed class name
+    new ParkWaitTimesApp();
 });
