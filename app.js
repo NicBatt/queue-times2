@@ -3,8 +3,8 @@ class ParkWaitTimesApp { // Renamed class
     constructor() {
         // Updated to the three specified parks
         this.supportedParks = [
-            { id: 64, name: "Islands of Adventure", shortName: "Islands", themedAreasConfigKey: "Islands" },
-            { id: 65, name: "Universal Studios Florida", shortName: "Sudios", themedAreasConfigKey: "Sudios" },
+            { id: 64, name: "Islands of Adventure", shortName: "Island", themedAreasConfigKey: "ioa" },
+            { id: 65, name: "Universal Studios Florida", shortName: "Studios", themedAreasConfigKey: "usf" },
             { id: 334, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" } // Verify ID
         ];
 
@@ -18,7 +18,7 @@ class ParkWaitTimesApp { // Renamed class
                 'super nintendo world': { color: '#FF4500', displayName: 'SUPER NINTENDO WORLD' },
                 'the wizarding world of harry potter — ministry of magic': { color: '#800080', displayName: 'The Wizarding World of Harry Potter — Ministry of Magic' }
             },
-            'Sudios': { // Park ID 65 (Universal Studios Florida)
+            'usf': { // Park ID 65 (Universal Studios Florida)
                 'dreamworks land': { color: '#0078D4', displayName: 'DreamWorks Land' },
                 'hollywood': { color: '#FFD700', displayName: 'Hollywood' },
                 'illumination\'s minion land': { color: '#FCE205', displayName: 'Illumination\'s Minion Land' },
@@ -28,7 +28,7 @@ class ParkWaitTimesApp { // Renamed class
                 'the wizarding world of harry potter - diagon alley': { color: '#4D2B7F', displayName: 'The Wizarding World of Harry Potter - Diagon Alley' }, // Note hyphen vs em-dash
                 'world expo': { color: '#00A86B', displayName: 'World Expo' }
             },
-            'Islands': { // Park ID 64 (Islands of Adventure) - Add land configs based on its JSON
+            'ioa': { // Park ID 64 (Islands of Adventure) - Add land configs based on its JSON
                 'jurassic park': { color: '#2E8B57', displayName: 'Jurassic Park' },
                 'marvel super hero island': { color: '#B22222', displayName: 'Marvel Super Hero Island' },
                 'seuss landing': { color: '#FF69B4', displayName: 'Seuss Landing' },
@@ -195,228 +195,229 @@ class ParkWaitTimesApp { // Renamed class
         }
     }
     
-   // Inside your ParkWaitTimesApp class:
+    structureApiDataForDisplay(apiData) {
+        const displayData = { lands: [] };
+        const processedRideIds = new Set();
+        // Get the land configuration for the current park
+        const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
+        const currentParkLandConfig = currentParkConfigKey ? (this.parkLandConfigs[currentParkConfigKey] || {}) : {};
 
-// ... (constructor, init, createParkButtons, updateParkTitle, switchPark, bindCoreEventListeners, fetchWaitTimes remain the same as the previous full refactor) ...
-// ... (getWaitTimeClass, formatWaitTime remain the same) ...
-// ... (renderWaitTimes, UI state methods, updateLastUpdatedDisplay, startAutoRefresh, startCountdown remain the same) ...
+        if (apiData.lands && Array.isArray(apiData.lands)) {
+            apiData.lands.forEach(landFromApi => {
+                // Match land by its name (lowercase) to get configured color/displayName
+                const apiLandNameLower = landFromApi.name.trim().toLowerCase();
+                const landConfig = currentParkLandConfig[apiLandNameLower] || {};
+                
+                const currentLand = {
+                    name: landConfig.displayName || landFromApi.name || 'Unnamed Land',
+                    color: landConfig.color, // Use configured color
+                    rides: []
+                };
 
-structureApiDataForDisplay(apiData) {
-    const displayData = { lands: [] };
-    const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
-    const currentParkLandConfig = currentParkConfigKey ? (this.parkLandConfigs[currentParkConfigKey] || {}) : {};
+                if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
+                    landFromApi.rides.forEach(rideFromApi => {
+                        const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+                        if (!processedRideIds.has(rideId)) {
+                            currentLand.rides.push({
+                                id: rideId,
+                                name: rideFromApi.name,
+                                waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+                                isOpen: rideFromApi.is_open === true,
+                                lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
+                            });
+                            processedRideIds.add(rideId);
+                        }
+                    });
+                }
+                if (currentLand.rides.length > 0) {
+                    displayData.lands.push(currentLand);
+                }
+            });
+        }
 
-    let allApiRides = []; // Collect all rides from API first
+        let unlandedRides = [];
+        if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) {
+            apiData.rides.forEach(rideFromApi => {
+                const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+                if (!processedRideIds.has(rideId)) {
+                    unlandedRides.push({
+                        id: rideId,
+                        name: rideFromApi.name,
+                        waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+                        isOpen: rideFromApi.is_open === true,
+                        lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date()
+                    });
+                    processedRideIds.add(rideId);
+                }
+            });
+        }
+        if (unlandedRides.length > 0) {
+            const unlandedConfigKey = 'other attractions / events'; // A generic key
+            const unlandedConfig = currentParkLandConfig[unlandedConfigKey] || {};
+            displayData.lands.push({ 
+                name: unlandedConfig.displayName || "Other Attractions", 
+                color: unlandedConfig.color, // Use configured color if you add one for this generic category
+                rides: unlandedRides 
+            });
+        }
+        
+        displayData.lands.sort((a, b) => a.name.localeCompare(b.name));
+        displayData.lands.forEach(land => {
+            land.rides.sort((a, b) => a.name.localeCompare(b.name));
+        });
 
-    // 1. Consolidate all rides from API (from lands and root)
-    if (apiData.lands && Array.isArray(apiData.lands)) {
-        apiData.lands.forEach(landFromApi => {
-            if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
-                landFromApi.rides.forEach(rideFromApi => {
-                    allApiRides.push({ ...rideFromApi, originalLandName: landFromApi.name });
-                });
-            }
+        return displayData;
+    }
+    
+    getWaitTimeClass(waitTime, isOpen) { 
+        if (!isOpen) return 'closed';
+        if (waitTime === null) return 'unknown'; 
+        if (waitTime <= 20) return 'low';
+        if (waitTime <= 45) return 'medium';
+        if (waitTime <= 75) return 'high';
+        return 'very-high';
+    }
+    
+    formatWaitTime(waitTime, isOpen) { 
+        if (!isOpen) return 'CLOSED';
+        if (waitTime === null) return 'N/A';
+        if (waitTime === 0) return 'Walk On'; // Added "Walk On"
+        return `${waitTime} min`;
+    }
+    
+    renderWaitTimes() {
+        const container = this.elements.themedAreasContainer;
+        if (!container) {
+            console.error('Element with ID "themed-areas" not found for rendering.');
+            return;
+        }
+        container.innerHTML = '';
+        
+        if (!this.waitTimeData || !this.waitTimeData.lands || this.waitTimeData.lands.length === 0) {
+            container.innerHTML = '<p class="no-rides-message" style="text-align:center; padding: 20px; color: var(--color-text-secondary);">No ride data available for this park at the moment.</p>';
+            return;
+        }
+
+        this.waitTimeData.lands.forEach(landData => {
+            const areaKey = landData.name.toLowerCase()
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/[^a-z0-9-]/g, ''); // Remove non-alphanumeric characters except hyphens
+            const areaElement = this.createThemedAreaElement(areaKey, landData);
+            container.appendChild(areaElement);
         });
     }
-    if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) { // Root rides
-        apiData.rides.forEach(rideFromApi => {
-            // Avoid adding if it's already there from a land (simple name check, ID check would be better if consistent)
-            // For this API, root rides are usually distinct, so direct add is okay.
-            allApiRides.push({ ...rideFromApi, originalLandName: rideFromApi.land || "Other Attractions" });
-        });
-    }
-
-    // 2. Identify single rider lines and main rides
-    const singleRiderLineNames = new Set();
-    const mainRideObjectsFromApi = [];
-
-    allApiRides.forEach(ride => {
-        if (ride.name && ride.name.toLowerCase().includes('single rider')) {
-            singleRiderLineNames.add(ride.name.toLowerCase());
+    
+    createThemedAreaElement(areaKey, landData) {
+        const areaDiv = document.createElement('div');
+        areaDiv.className = `themed-area themed-area--${areaKey}`;
+        if (landData.color) {
+            areaDiv.style.borderColor = landData.color;
         } else {
-            mainRideObjectsFromApi.push(ride);
+            // Fallback border color if not specified in config (matches your CSS for Epic)
+            // You can also define a default in CSS for .themed-area
+            areaDiv.style.borderColor = 'rgba(255, 255, 255, 0.2)'; 
         }
-    });
-
-    // 3. Group main rides by land and add single rider flag
-    const ridesByLand = {};
-
-    mainRideObjectsFromApi.forEach(mainRide => {
-        const landNameKey = (mainRide.originalLandName || "Other Attractions").trim().toLowerCase();
-        const landConfig = currentParkLandConfig[landNameKey] || {};
-        const displayLandName = landConfig.displayName || mainRide.originalLandName || "Other Attractions";
-        const areaColor = landConfig.color; // Get area color
-
-        if (!ridesByLand[displayLandName]) {
-            ridesByLand[displayLandName] = {
-                name: displayLandName,
-                color: areaColor,
-                rides: []
-            };
-        }
-
-        // Check if this main ride has a corresponding single rider line
-        // This assumes single rider lines are named predictably (e.g., "Ride Name Single Rider")
-        const potentialSingleRiderName = `${mainRide.name} single rider`.toLowerCase();
-        const hasSingleRider = singleRiderLineNames.has(potentialSingleRiderName) || 
-                               singleRiderLineNames.has(`${mainRide.name.replace(/™/g, '')} single rider`.toLowerCase()) || // Handle TM symbol if present
-                               singleRiderLineNames.has(`${mainRide.name.replace(/®/g, '')} single rider`.toLowerCase()); // Handle R symbol if present
-
-
-        ridesByLand[displayLandName].rides.push({
-            id: mainRide.id || `no-id-${mainRide.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`,
-            name: mainRide.name,
-            waitTime: mainRide.is_open ? parseInt(mainRide.wait_time, 10) : null,
-            isOpen: mainRide.is_open === true,
-            lastUpdated: mainRide.last_updated ? new Date(mainRide.last_updated) : new Date(),
-            hasSingleRider: hasSingleRider, // Add the flag
-            areaColor: areaColor // Pass area color for the sticker
-        });
-    });
-
-    // 4. Convert grouped rides into the displayData.lands structure
-    for (const landName in ridesByLand) {
-        displayData.lands.push(ridesByLand[landName]);
-    }
-    
-    displayData.lands.sort((a, b) => a.name.localeCompare(b.name));
-    displayData.lands.forEach(land => {
-        land.rides.sort((a, b) => a.name.localeCompare(b.name));
-    });
-
-    return displayData;
-}
-
-
-createThemedAreaElement(areaKey, landData) {
-    const areaDiv = document.createElement('div');
-    areaDiv.className = `themed-area themed-area--${areaKey}`;
-    if (landData.color) {
-        areaDiv.style.borderColor = landData.color;
-    } else {
-        areaDiv.style.borderColor = 'rgba(255, 255, 255, 0.2)'; 
-    }
-    
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'area-header';
-    
-    const iconDiv = document.createElement('div');
-    iconDiv.className = 'area-icon';
-    if (landData.color) {
-        iconDiv.style.backgroundColor = landData.color; 
-    } else {
-         iconDiv.style.backgroundColor = 'var(--color-text-secondary)';
-    }
-    
-    const titleH2 = document.createElement('h2');
-    titleH2.className = 'area-title';
-    titleH2.textContent = landData.name; 
-    
-    headerDiv.appendChild(iconDiv);
-    headerDiv.appendChild(titleH2);
-    
-    const attractionsGrid = document.createElement('div');
-    attractionsGrid.className = 'attractions-grid';
-    
-    if (landData.rides && landData.rides.length > 0) {
-        landData.rides.forEach(rideData => {
-            // Pass landData.color to createAttractionCard if needed, or ensure rideData contains it
-            const attractionCard = this.createAttractionCard(rideData); // rideData now includes areaColor
-            attractionsGrid.appendChild(attractionCard);
-        });
-    } else {
-        const noRidesMsg = document.createElement('p');
-        noRidesMsg.textContent = 'No specific ride data in this area currently.';
-        noRidesMsg.className = 'no-rides-in-area-message';
-        attractionsGrid.appendChild(noRidesMsg);
-    }
-    
-    areaDiv.appendChild(headerDiv);
-    areaDiv.appendChild(attractionsGrid);
-    return areaDiv;
-}
-
-createAttractionCard(rideData) { // rideData now contains areaColor and hasSingleRider
-    const cardDiv = document.createElement('div');
-    cardDiv.className = 'attraction-card';
-     if (!rideData.isOpen) {
-        cardDiv.classList.add('attraction-card--closed');
-    }
-    
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'attraction-header';
-    
-    const nameH3 = document.createElement('h3');
-    nameH3.className = 'attraction-name';
-    nameH3.textContent = rideData.name;
-    
-    const waitTimeDisplayDiv = document.createElement('div');
-    waitTimeDisplayDiv.className = 'wait-time-display';
-    
-    const waitTimeSpan = document.createElement('span');
-    const waitTimeClass = this.getWaitTimeClass(rideData.waitTime, rideData.isOpen);
-    waitTimeSpan.className = `wait-time wait-time--${waitTimeClass}`;
-    waitTimeSpan.textContent = this.formatWaitTime(rideData.waitTime, rideData.isOpen);
-    
-    const statusDiv = document.createElement('div');
-    statusDiv.className = 'attraction-status';
-    
-    const statusIndicator = document.createElement('div');
-    const statusClass = rideData.isOpen ? 'open' : 'closed'; 
-    statusIndicator.className = `status-indicator status-indicator--${statusClass}`;
-    if (rideData.isOpen && rideData.waitTime === null) {
-        statusIndicator.classList.remove(`status-indicator--${statusClass}`);
-        statusIndicator.classList.add('status-indicator--unknown');
-    }
-    
-    const statusDot = document.createElement('span');
-    statusDot.className = 'status-dot';
-    
-    const statusText = document.createElement('span');
-    statusText.className = 'status-text'; 
-    statusText.textContent = rideData.isOpen ? 'Open' : 'Closed';
-    if (rideData.isOpen && rideData.waitTime === null) statusText.textContent = 'N/A';
-    
-    statusIndicator.appendChild(statusDot);
-    statusIndicator.appendChild(statusText);
-    statusDiv.appendChild(statusIndicator);
-    
-    if (rideData.lastUpdated) { 
-        const lastUpdatedRideSpan = document.createElement('span');
-        lastUpdatedRideSpan.className = 'ride-last-updated'; 
-        lastUpdatedRideSpan.textContent = `Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
-        statusDiv.appendChild(lastUpdatedRideSpan);
-    }
-    
-    waitTimeDisplayDiv.appendChild(waitTimeSpan);
-    waitTimeDisplayDiv.appendChild(statusDiv);
-    
-    headerDiv.appendChild(nameH3);
-    headerDiv.appendChild(waitTimeDisplayDiv);
-    cardDiv.appendChild(headerDiv);
-
-    // *** ADD SINGLE RIDER STICKER ***
-    if (rideData.hasSingleRider && rideData.isOpen) { // Only show if open and available
-        const sticker = document.createElement('div');
-        sticker.className = 'single-rider-sticker';
-        sticker.textContent = 'SINGLE';
-        if (rideData.areaColor) {
-            sticker.style.backgroundColor = rideData.areaColor;
-            // Basic contrast for text color - you might need a more sophisticated function
-            // if your area colors vary a lot in brightness.
-            const isDark = (parseInt(rideData.areaColor.substr(1, 2), 16) * 0.299 + 
-                            parseInt(rideData.areaColor.substr(3, 2), 16) * 0.587 + 
-                            parseInt(rideData.areaColor.substr(5, 2), 16) * 0.114) < 186;
-            sticker.style.color = isDark ? 'white' : 'black';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'area-header';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'area-icon';
+        if (landData.color) {
+            iconDiv.style.backgroundColor = landData.color; 
         } else {
-            sticker.style.backgroundColor = 'var(--color-primary)'; // Fallback color
-            sticker.style.color = 'var(--color-btn-primary-text)';
+             iconDiv.style.backgroundColor = 'var(--color-text-secondary)';
         }
-        cardDiv.appendChild(sticker);
+        
+        const titleH2 = document.createElement('h2');
+        titleH2.className = 'area-title';
+        titleH2.textContent = landData.name; 
+        
+        headerDiv.appendChild(iconDiv);
+        headerDiv.appendChild(titleH2);
+        
+        const attractionsGrid = document.createElement('div');
+        attractionsGrid.className = 'attractions-grid';
+        
+        if (landData.rides && landData.rides.length > 0) {
+            landData.rides.forEach(rideData => {
+                const attractionCard = this.createAttractionCard(rideData);
+                attractionsGrid.appendChild(attractionCard);
+            });
+        } else {
+            const noRidesMsg = document.createElement('p');
+            noRidesMsg.textContent = 'No specific ride data in this area currently.';
+            noRidesMsg.className = 'no-rides-in-area-message';
+            attractionsGrid.appendChild(noRidesMsg);
+        }
+        
+        areaDiv.appendChild(headerDiv);
+        areaDiv.appendChild(attractionsGrid);
+        return areaDiv;
     }
     
-    return cardDiv;
-}
+    createAttractionCard(rideData) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'attraction-card';
+         if (!rideData.isOpen) {
+            cardDiv.classList.add('attraction-card--closed'); // Add a class for specific styling
+        }
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'attraction-header';
+        
+        const nameH3 = document.createElement('h3');
+        nameH3.className = 'attraction-name';
+        nameH3.textContent = rideData.name;
+        
+        const waitTimeDisplayDiv = document.createElement('div');
+        waitTimeDisplayDiv.className = 'wait-time-display';
+        
+        const waitTimeSpan = document.createElement('span');
+        const waitTimeClass = this.getWaitTimeClass(rideData.waitTime, rideData.isOpen);
+        waitTimeSpan.className = `wait-time wait-time--${waitTimeClass}`;
+        waitTimeSpan.textContent = this.formatWaitTime(rideData.waitTime, rideData.isOpen);
+        
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'attraction-status';
+        
+        const statusIndicator = document.createElement('div');
+        const statusClass = rideData.isOpen ? 'open' : 'closed'; 
+        statusIndicator.className = `status-indicator status-indicator--${statusClass}`;
+        if (rideData.isOpen && rideData.waitTime === null) { // Add unknown class if open but wait time is N/A
+            statusIndicator.classList.remove(`status-indicator--${statusClass}`); // remove open/closed
+            statusIndicator.classList.add('status-indicator--unknown');
+        }
+        
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot';
+        
+        const statusText = document.createElement('span');
+        statusText.className = 'status-text'; 
+        statusText.textContent = rideData.isOpen ? 'Open' : 'Closed';
+        if (rideData.isOpen && rideData.waitTime === null) statusText.textContent = 'N/A';
+        
+        statusIndicator.appendChild(statusDot);
+        statusIndicator.appendChild(statusText);
+        statusDiv.appendChild(statusIndicator);
+        
+        if (rideData.lastUpdated) { 
+            const lastUpdatedRideSpan = document.createElement('span');
+            lastUpdatedRideSpan.className = 'ride-last-updated'; 
+            lastUpdatedRideSpan.textContent = `Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+            statusDiv.appendChild(lastUpdatedRideSpan);
+        }
+        
+        waitTimeDisplayDiv.appendChild(waitTimeSpan);
+        waitTimeDisplayDiv.appendChild(statusDiv);
+        
+        headerDiv.appendChild(nameH3);
+        headerDiv.appendChild(waitTimeDisplayDiv);
+        
+        cardDiv.appendChild(headerDiv);
+        return cardDiv;
+    }
+    
     showLoadingState() {
         if(this.elements.loadingState) this.elements.loadingState.classList.remove('hidden');
         if(this.elements.errorState) this.elements.errorState.classList.add('hidden');
