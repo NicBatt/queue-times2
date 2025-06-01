@@ -693,11 +693,11 @@ select.form-control {
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  /* position: sticky; Removed */
+  /* top: 0;           Removed */
+  z-index: 100; /* Keep z-index if you have overlapping elements during scroll, otherwise optional */
+  position: relative; /* Or remove position property entirely if block behavior is fine */
 }
-
 .header-content {
   display: flex;
   justify-content: space-between;
