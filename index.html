@@ -3,51 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Parks Wait Times</title>
+    <title>Universal Parks Wait Times - Live Queue Data</title>
+    <meta name="description" content="Live wait times for Universal theme park attractions. Check real-time queue data.">
+    <meta property="og:title" content="Universal Parks Wait Times">
+    <meta property="og:description" content="Live wait times for Universal theme park attractions">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app">
         <header class="header">
-            <h1>Universal Parks Wait Times</h1>
-            <div class="park-navigation">
-                <button class="btn btn--nav active" data-park-id="334">Epic Universe</button>
-                <button class="btn btn--nav" data-park-id="65">Universal Studios Florida</button>
-                <button class="btn btn--nav" data-park-id="66">Universal Studios Hollywood</button>
-            </div>
-            <div class="header-controls">
-                <button class="btn btn--secondary btn--sm" id="refreshBtn">
-                    <span class="refresh-icon">↻</span> Refresh
-                </button>
-                <div class="last-updated">
-                    <span id="lastUpdated">Loading...</span>
+            <div class="container">
+                <nav class="park-navigation" aria-label="Select a Park">
+                    <div id="parkButtonsContainer" class="park-buttons">
+                        </div>
+                </nav>
+                <hr class="header-divider"> {/* Optional: visual separator */}
+                <div class="header-content">
+                    <h1 class="park-title">
+                        <span id="currentParkNameElement" class="park-name">Loading Park...</span>
+                        <span class="subtitle">Live Wait Times</span>
+                    </h1>
+                    <div class="header-controls">
+                        <button id="refresh-btn" class="btn btn--secondary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"  aria-hidden="true">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="status-bar">
+                    <div class="last-updated">
+                        Last updated: <span id="last-updated">--</span>
+                    </div>
+                    <div class="auto-refresh-status">
+                        Auto-refresh: <span id="auto-refresh-countdown">5:00</span>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <main class="main-content">
-            <div class="park-info">
-                <h2 id="currentParkName">Epic Universe</h2>
-                <p id="currentParkLocation">Orlando, FL</p>
-            </div>
+        <main class="main">
+            <div class="container">
+                <div id="loading-state" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading wait times...</p>
+                </div>
 
-            <div class="loading-container" id="loadingContainer">
-                <div class="loading-spinner"></div>
-                <p>Loading wait times...</p>
-            </div>
-
-            <div class="error-container hidden" id="errorContainer">
-                <div class="error-message">
+                <div id="error-state" class="error-state hidden">
+                    <div class="error-icon"  aria-hidden="true">⚠️</div>
                     <h3>Unable to load wait times</h3>
-                    <p id="errorText">Please check your connection and try again.</p>
-                    <button class="btn btn--primary" onclick="retryLoad()">Try Again</button>
+                    <p id="error-message">Please check your connection and try again.</p>
+                    <button id="retry-btn" class="btn btn--primary">Try Again</button>
+                </div>
+
+                <div id="content" class="content hidden">
+                    <div class="wait-time-legend">
+                        <h3>Wait Time Guide</h3>
+                        <div class="legend-items">
+                            <div class="legend-item">
+                                <span class="legend-color legend-color--low"></span>
+                                <span>0-20 min</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color legend-color--medium"></span>
+                                <span>21-45 min</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color legend-color--high"></span>
+                                <span>46-75 min</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color legend-color--very-high"></span>
+                                <span>76+ min</span>
+                            </div>
+                             <div class="legend-item">
+                                <span class="legend-color legend-color--closed"></span>
+                                <span>Closed/N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="themed-areas" class="themed-areas">
+                        </div>
                 </div>
             </div>
-
-            <div class="wait-times-container" id="waitTimesContainer">
-                <!-- Wait times will be populated here -->
-            </div>
         </main>
+
+        <footer class="footer">
+            <div class="container">
+                <p>Wait time data provided by <a href="https://queue-times.com" target="_blank" rel="noopener">Queue-Times.com</a></p>
+                <p>This is an unofficial wait times tracker. Times are estimates and may not reflect actual park conditions.</p>
+            </div>
+        </footer>
     </div>
 
     <script src="app.js"></script>
