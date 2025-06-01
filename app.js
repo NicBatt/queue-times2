@@ -3,8 +3,8 @@ class ParkWaitTimesApp { // Renamed class
     constructor() {
         // Updated to the three specified parks
         this.supportedParks = [
-            { id: 64, name: "Islands of Adventure", shortName: "IoA", themedAreasConfigKey: "ioa" },
-            { id: 65, name: "Universal Studios Florida", shortName: "USF", themedAreasConfigKey: "usf" },
+            { id: 64, name: "Islands of Adventure", shortName: "Islands", themedAreasConfigKey: "Islands" },
+            { id: 65, name: "Universal Studios Florida", shortName: "Sudios", themedAreasConfigKey: "Sudios" },
             { id: 334, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" } // Verify ID
         ];
 
@@ -18,7 +18,7 @@ class ParkWaitTimesApp { // Renamed class
                 'super nintendo world': { color: '#FF4500', displayName: 'SUPER NINTENDO WORLD' },
                 'the wizarding world of harry potter — ministry of magic': { color: '#800080', displayName: 'The Wizarding World of Harry Potter — Ministry of Magic' }
             },
-            'usf': { // Park ID 65 (Universal Studios Florida)
+            'Sudios': { // Park ID 65 (Universal Studios Florida)
                 'dreamworks land': { color: '#0078D4', displayName: 'DreamWorks Land' },
                 'hollywood': { color: '#FFD700', displayName: 'Hollywood' },
                 'illumination\'s minion land': { color: '#FCE205', displayName: 'Illumination\'s Minion Land' },
@@ -28,7 +28,7 @@ class ParkWaitTimesApp { // Renamed class
                 'the wizarding world of harry potter - diagon alley': { color: '#4D2B7F', displayName: 'The Wizarding World of Harry Potter - Diagon Alley' }, // Note hyphen vs em-dash
                 'world expo': { color: '#00A86B', displayName: 'World Expo' }
             },
-            'ioa': { // Park ID 64 (Islands of Adventure) - Add land configs based on its JSON
+            'Islands': { // Park ID 64 (Islands of Adventure) - Add land configs based on its JSON
                 'jurassic park': { color: '#2E8B57', displayName: 'Jurassic Park' },
                 'marvel super hero island': { color: '#B22222', displayName: 'Marvel Super Hero Island' },
                 'seuss landing': { color: '#FF69B4', displayName: 'Seuss Landing' },
