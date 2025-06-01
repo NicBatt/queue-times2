@@ -985,3 +985,44 @@ select.form-control {
     outline: 2px solid white;
     outline-offset: 2px;
 }
+/* Add to your style.css */
+.park-navigation {
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Optional: if you remove hr */
+  margin-bottom: var(--space-12); /* Optional: if you remove hr */
+}
+
+.header-divider {
+    border: none;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-top: var(--space-12);
+    margin-bottom: var(--space-16);
+}
+
+.park-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+}
+
+.park-buttons .btn {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.park-buttons .btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+}
+
+.park-buttons .btn.active { /* Style for the active park button */
+  background: linear-gradient(45deg, #4FC3F7, #29B6F6);
+  color: var(--color-btn-primary-text); /* Or your dark text color for primary buttons */
+  border-color: #4FC3F7;
+  font-weight: var(--font-weight-bold);
+}
+
+.legend-color--closed { background-color: #6C757D; }
