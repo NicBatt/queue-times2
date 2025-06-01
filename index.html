@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Parks Wait Times</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Universal Parks Wait Times</h1>
+            <div class="park-navigation">
+                <button class="btn btn--nav active" data-park-id="334">Epic Universe</button>
+                <button class="btn btn--nav" data-park-id="65">Universal Studios Florida</button>
+                <button class="btn btn--nav" data-park-id="66">Universal Studios Hollywood</button>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn--secondary btn--sm" id="refreshBtn">
+                    <span class="refresh-icon">↻</span> Refresh
+                </button>
+                <div class="last-updated">
+                    <span id="lastUpdated">Loading...</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="park-info">
+                <h2 id="currentParkName">Epic Universe</h2>
+                <p id="currentParkLocation">Orlando, FL</p>
+            </div>
+
+            <div class="loading-container" id="loadingContainer">
+                <div class="loading-spinner"></div>
+                <p>Loading wait times...</p>
+            </div>
+
+            <div class="error-container hidden" id="errorContainer">
+                <div class="error-message">
+                    <h3>Unable to load wait times</h3>
+                    <p id="errorText">Please check your connection and try again.</p>
+                    <button class="btn btn--primary" onclick="retryLoad()">Try Again</button>
+                </div>
+            </div>
+
+            <div class="wait-times-container" id="waitTimesContainer">
+                <!-- Wait times will be populated here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
