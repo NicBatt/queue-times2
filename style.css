@@ -954,30 +954,47 @@ select.form-control {
   border-color: #6C757D;
 }
 
+/* ... your other styles ... */
+
 .attraction-status {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  margin-top: var(--space-4);
+  margin-top: var(--space-8); /* More space above the status block */
+  line-height: var(--line-height-normal); /* Ensure lines don't bunch up */
 }
 
 .status-indicator {
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4); /* Space between "Open/Closed" and "Updated" time */
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: currentColor;
+  background-color: currentColor; /* This will be overridden by specific status */
 }
 
-.status-indicator--open .status-dot { background-color: #28A745; }
-.status-indicator--closed .status-dot { background-color: #DC3545; }
-.status-indicator--unknown .status-dot { background-color: #6C757D; }
+/* Colors for status dot based on parent .status-indicator--[status] */
+.status-indicator--open .status-dot { background-color: #28A745; } /* Or your --color-success */
+.status-indicator--closed .status-dot { background-color: #DC3545; } /* Or your --color-error */
+.status-indicator--unknown .status-dot { background-color: #6C757D; } /* Or your --color-info */
+
+
+.status-text {
+  /* Add any specific styling for the "Open", "Closed", "N/A" text if needed */
+}
+
+.ride-last-updated {
+  display: block; /* Puts it on a new line */
+  font-size: calc(var(--font-size-xs) * 0.9); /* e.g., 11px * 0.9 = ~10px */
+  color: var(--color-text-secondary);
+  opacity: 0.85; /* Slightly less prominent */
+}
+
+/* ... your other styles ... */
 
 /* Footer */
 .footer {
