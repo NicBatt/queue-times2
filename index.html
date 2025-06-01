@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Parks Wait Times - Live Queue Data</title>
+    <title>Universal Parks Wait Times - Live Queue Data</title> {/* Updated title */}
     <meta name="description" content="Live wait times for Universal theme park attractions. Check real-time queue data.">
     <meta property="og:title" content="Universal Parks Wait Times">
     <meta property="og:description" content="Live wait times for Universal theme park attractions">
@@ -19,7 +19,9 @@
                     <div id="parkButtonsContainer" class="park-buttons">
                         </div>
                 </nav>
-                <hr class="header-divider"> {/* Added for separation */}
+                {/* This <hr> is kept, the comment next to it in your previous code would be where the removal happened if it was there. 
+                    If you meant to remove the <hr> itself, delete the line below. */}
+                <hr class="header-divider"> 
 
                 <div class="header-content">
                     <h1 class="park-title">
@@ -56,7 +58,7 @@
                 </div>
 
                 <div id="error-state" class="error-state hidden">
-                    <div class="error-icon" aria-hidden="true">⚠️</div> {/* Ensured aria-hidden for decorative icon */}
+                    <div class="error-icon" aria-hidden="true">⚠️</div>
                     <h3>Unable to load wait times</h3>
                     <p id="error-message">Please check your connection and try again.</p>
                     <button id="retry-btn" class="btn btn--primary">Try Again</button>
@@ -82,7 +84,6 @@
                                 <span class="legend-color legend-color--very-high"></span>
                                 <span>76+ min</span>
                             </div>
-                            {/* Added a legend item for closed/N/A based on your style.css */}
                             <div class="legend-item">
                                 <span class="legend-color legend-color--closed"></span>
                                 <span>Closed/N/A</span>
