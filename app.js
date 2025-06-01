@@ -4,15 +4,14 @@ class EpicUniverseWaitTimes {
         this.apiConfig = {
             parkId: 334, // IMPORTANT: Verify this ID for Epic Universe on queue-times.com
             proxyUrl: 'https://corsproxy.io/?url=',
-            // Corrected: Added .json to the end of the baseUrl
             baseUrl: `https://queue-times.com/en-US/parks/334/queue_times.json`
         };
 
+        // Corrected this.themedAreas to match API response names exactly
         this.themedAreas = {
             'celestial_park': {
                 name: 'Celestial Park',
                 color: '#4A90E2',
-                // IMPORTANT: Ensure these names match the API's ride names exactly
                 attractions: ['Constellation Carousel', 'Stardust Racers']
             },
             'dark_universe': {
@@ -21,23 +20,35 @@ class EpicUniverseWaitTimes {
                 attractions: ['Curse of the Werewolf', 'Monsters Unchained: The Frankenstein Experiment']
             },
             'how_to_train_dragon': {
-                name: 'How to Train Your Dragon - Isle of Berk',
+                name: 'How to Train Your Dragon — Isle of Berk', // Matched API's em dash
                 color: '#228B22',
-                attractions: ['Dragon Racer\'s Rally', 'Fyre Drill', 'Hiccup\'s Wing Gliders', 'Meet Toothless and Friends'] // Example: "Meet Toothless and Friends" might be a show/experience, check API for wait times
+                attractions: [
+                    'Dragon Racer\'s Rally',
+                    'Fyre Drill',
+                    'Hiccup Wing Glider', // Corrected from "Hiccup's Wing Gliders"
+                    'Meet Toothless and Friends'
+                ]
             },
             'super_nintendo_world': {
-                name: 'Super Nintendo World',
+                name: 'SUPER NINTENDO WORLD', // Matched API casing
                 color: '#FF4500',
-                attractions: ['Bowser Jr. Challenge', 'Mario Kart: Bowser\'s Challenge', 'Mine-Cart Madness', 'Yoshi\'s Adventure']
+                attractions: [
+                    'Bowser Jr. Challenge',
+                    'Mario Kart™: Bowser\'s Challenge', // Added ™
+                    'Mine-Cart Madness™',              // Added ™
+                    'Yoshi\'s Adventure™'               // Added ™
+                ]
             },
             'wizarding_world': {
-                name: 'The Wizarding World of Harry Potter - Ministry of Magic',
+                name: 'The Wizarding World of Harry Potter — Ministry of Magic', // Matched API's em dash
                 color: '#800080',
-                attractions: ['Harry Potter and the Battle at the Ministry']
+                attractions: [
+                    'Harry Potter and the Battle at the Ministry™' // Added ™
+                ]
             }
         };
 
-        this.waitTimeData = {}; // This will store processed data for your attractions
+        this.waitTimeData = {};
         this.lastUpdated = null;
         this.autoRefreshInterval = null;
         this.countdownInterval = null;
@@ -48,8 +59,8 @@ class EpicUniverseWaitTimes {
 
     init() {
         this.bindEventListeners();
-        this.fetchWaitTimes(); // Initial fetch
-        this.startAutoRefresh(); // Start auto-refresh after the first fetch attempt
+        this.fetchWaitTimes();
+        this.startAutoRefresh();
     }
 
     bindEventListeners() {
@@ -70,7 +81,7 @@ class EpicUniverseWaitTimes {
         console.log('Fetching wait times...');
 
         try {
-            const fullApiUrl = this.apiConfig.baseUrl; // Uses the park-specific .json URL
+            const fullApiUrl = this.apiConfig.baseUrl;
             const proxiedUrl = this.apiConfig.proxyUrl + encodeURIComponent(fullApiUrl);
             console.log('Requesting URL:', proxiedUrl);
 
@@ -80,23 +91,22 @@ class EpicUniverseWaitTimes {
             if (!response.ok) {
                 let errorDetails = `HTTP error! status: ${response.status}`;
                 try {
-                    // Try to get more info from the response body if it's JSON or text
-                    const errorBody = await response.text(); // Read as text first
+                    const errorBody = await response.text();
                     console.error('Error response body:', errorBody);
                     try {
                         const errorJson = JSON.parse(errorBody);
                         errorDetails += ` - ${JSON.stringify(errorJson)}`;
                     } catch (e) {
-                        errorDetails += ` - ${errorBody.substring(0, 100)}...`; // Add snippet if not JSON
+                        errorDetails += ` - ${errorBody.substring(0, 100)}...`;
                     }
-                } catch (e) { /* ignore if error response body can't be read */ }
+                } catch (e) { /* ignore */ }
                 throw new Error(errorDetails);
             }
 
-            const apiData = await response.json(); // Directly parse the JSON response
+            const apiData = await response.json();
             console.log('API Data Received:', apiData);
 
-            this.waitTimeData = this.processRealApiData(apiData); // Process the real data
+            this.waitTimeData = this.processRealApiData(apiData);
             console.log('Processed Wait Time Data:', this.waitTimeData);
 
             this.lastUpdated = new Date();
@@ -114,40 +124,34 @@ class EpicUniverseWaitTimes {
         const processedData = {};
         let allRidesFromApi = [];
 
-        // The API response might have a 'lands' array, each with a 'rides' array,
-        // OR just a 'rides' array at the top level.
         if (apiData.lands && Array.isArray(apiData.lands)) {
             apiData.lands.forEach(land => {
                 if (land.rides && Array.isArray(land.rides)) {
                     allRidesFromApi = allRidesFromApi.concat(land.rides);
                 }
             });
-        } else if (apiData.rides && Array.isArray(apiData.rides)) { // Fallback for flat ride structure
+        } else if (apiData.rides && Array.isArray(apiData.rides)) {
             allRidesFromApi = apiData.rides;
         } else {
             console.warn("API data does not contain 'lands' or 'rides' array:", apiData);
         }
 
-        // Get all attraction names defined in this.themedAreas
         const appAttractionNames = Object.values(this.themedAreas).flatMap(area => area.attractions);
 
         appAttractionNames.forEach(appAttractionName => {
-            // Find the corresponding ride in the API data by name
-            // API names can be tricky, ensure exact match or use a more fuzzy match if needed
             const apiRideData = allRidesFromApi.find(
                 ride => ride.name.trim().toLowerCase() === appAttractionName.trim().toLowerCase()
             );
 
             if (apiRideData) {
                 processedData[appAttractionName] = {
-                    name: apiRideData.name, // Use the name from API for consistency if slightly different
+                    name: apiRideData.name,
                     waitTime: apiRideData.is_open ? parseInt(apiRideData.wait_time, 10) : null,
                     status: apiRideData.is_open ? 'Open' : 'Closed',
                     isOpen: apiRideData.is_open,
-                    lastUpdated: new Date() // Or use a timestamp from API if available and preferred
+                    lastUpdated: new Date(apiRideData.last_updated) // Use last_updated from API
                 };
             } else {
-                // Attraction defined in your app but not found in API response for this park
                 processedData[appAttractionName] = {
                     name: appAttractionName,
                     waitTime: null,
@@ -160,9 +164,12 @@ class EpicUniverseWaitTimes {
         return processedData;
     }
 
-    getWaitTimeClass(waitTime) {
-        if (waitTime === null || typeof waitTime === 'undefined') return 'unknown'; // For 'Not Found' or truly null
-        if (waitTime === 0 && status !== 'Open') return 'closed'; // If waitTime is 0 but ride is 'Open', treat as low.
+    getWaitTimeClass(waitTime, status) { // Added status parameter for context
+        if (status === 'Not Found' || status === 'Closed' || waitTime === null || typeof waitTime === 'undefined') {
+             // Distinguish closed from simply 0 wait time if needed
+            if (status === 'Closed' || status === 'Not Found') return 'closed'; // Or 'not-found'
+            return 'unknown';
+        }
         if (waitTime <= 20) return 'low';
         if (waitTime <= 45) return 'medium';
         if (waitTime <= 75) return 'high';
@@ -182,7 +189,7 @@ class EpicUniverseWaitTimes {
             console.error('Element with ID "themed-areas" not found for rendering.');
             return;
         }
-        themedAreasContainer.innerHTML = ''; // Clear previous content
+        themedAreasContainer.innerHTML = '';
 
         Object.entries(this.themedAreas).forEach(([areaKey, areaData]) => {
             const areaElement = this.createThemedAreaElement(areaKey, areaData);
@@ -192,7 +199,7 @@ class EpicUniverseWaitTimes {
 
     createThemedAreaElement(areaKey, areaData) {
         const areaDiv = document.createElement('div');
-        areaDiv.className = `themed-area themed-area--${areaKey.replace(/_/g, '-')}`; // Ensure all _ are replaced
+        areaDiv.className = `themed-area themed-area--${areaKey.replace(/_/g, '-')}`;
 
         const headerDiv = document.createElement('div');
         headerDiv.className = 'area-header';
@@ -213,12 +220,10 @@ class EpicUniverseWaitTimes {
 
         areaData.attractions.forEach(attractionName => {
             const attractionData = this.waitTimeData[attractionName];
-            // Only create a card if data exists (even if it's 'Not Found' status)
             if (attractionData) {
                 const attractionCard = this.createAttractionCard(attractionData);
                 attractionsGrid.appendChild(attractionCard);
             } else {
-                // This case should be less common if processRealApiData populates all defined attractions
                 console.warn(`No data found in this.waitTimeData for attraction: ${attractionName}`);
             }
         });
@@ -243,7 +248,6 @@ class EpicUniverseWaitTimes {
         waitTimeDisplayDiv.className = 'wait-time-display';
 
         const waitTimeSpan = document.createElement('span');
-        // Pass status to getWaitTimeClass if it affects styling of '0' wait time
         const waitTimeClass = this.getWaitTimeClass(attractionData.waitTime, attractionData.status);
         waitTimeSpan.className = `wait-time wait-time--${waitTimeClass}`;
         waitTimeSpan.textContent = this.formatWaitTime(attractionData.waitTime, attractionData.status);
@@ -252,7 +256,6 @@ class EpicUniverseWaitTimes {
         statusDiv.className = 'attraction-status';
 
         const statusIndicator = document.createElement('div');
-        // Use a more generic class or specific for 'not-found'
         const statusClass = attractionData.isOpen ? 'open' : (attractionData.status === 'Not Found' ? 'not-found' : 'closed');
         statusIndicator.className = `status-indicator status-indicator--${statusClass}`;
 
@@ -260,12 +263,25 @@ class EpicUniverseWaitTimes {
         statusDot.className = 'status-dot';
 
         const statusText = document.createElement('span');
-        statusText.className = 'status-text'; // Added class for easier styling
+        statusText.className = 'status-text';
         statusText.textContent = attractionData.status;
+
+        // Display last_updated from API for each ride
+        const lastUpdatedRideSpan = document.createElement('span');
+        lastUpdatedRideSpan.className = 'ride-last-updated';
+        if (attractionData.lastUpdated && attractionData.status !== 'Not Found') {
+            lastUpdatedRideSpan.textContent = `Updated: ${new Date(attractionData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+        }
+
 
         statusIndicator.appendChild(statusDot);
         statusIndicator.appendChild(statusText);
         statusDiv.appendChild(statusIndicator);
+        // Add the ride-specific last updated time
+        if (attractionData.status !== 'Not Found') { // Only show if ride data was found
+             statusDiv.appendChild(lastUpdatedRideSpan);
+        }
+
 
         waitTimeDisplayDiv.appendChild(waitTimeSpan);
         waitTimeDisplayDiv.appendChild(statusDiv);
@@ -313,11 +329,10 @@ class EpicUniverseWaitTimes {
         const lastUpdatedElement = document.getElementById('last-updated');
         if (lastUpdatedElement && this.lastUpdated) {
             const timeString = this.lastUpdated.toLocaleTimeString('en-US', {
-                hour: 'numeric', // '2-digit'
+                hour: 'numeric',
                 minute: '2-digit',
-                // second: '2-digit' // Optional: if you want seconds
             });
-            lastUpdatedElement.textContent = timeString;
+            lastUpdatedElement.textContent = timeString; // This is the overall fetch time
         }
     }
 
@@ -339,7 +354,7 @@ class EpicUniverseWaitTimes {
 
         const updateCountdown = () => {
             if (timeLeft <= 0) {
-                timeLeft = this.autoRefreshTime / 1000; // Reset for next cycle
+                timeLeft = this.autoRefreshTime / 1000;
             }
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -351,7 +366,7 @@ class EpicUniverseWaitTimes {
             timeLeft--;
         };
         
-        updateCountdown(); // Call once immediately to display initial countdown
+        updateCountdown();
         this.countdownInterval = setInterval(updateCountdown, 1000);
     }
 }
