@@ -1,4 +1,4 @@
-// Universal Parks Wait Times Application (Refactored)
+ // Universal Parks Wait Times Application (Refactored)
 class ParkWaitTimesApp {
     constructor() {
         this.supportedParks = [
@@ -186,118 +186,85 @@ class ParkWaitTimesApp {
     // This version processes all rides, including single rider lines as separate entries.
     // It uses parkLandConfigs for land display names and colors.
     structureApiDataForDisplay(apiData) {
-  const displayData = { lands: [] };
-  const processedRideIds = new Set();
-  const currentParkConfigKey = this.currentParkMeta
-    ? this.currentParkMeta.themedAreasConfigKey
-    : null;
-  const currentParkSpecificLandConfig = currentParkConfigKey
-    ? (this.parkLandConfigs[currentParkConfigKey] || {})
-    : {};
+        const displayData = { lands: [] };
+        const processedRideIds = new Set(); 
+        const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
+        const currentParkSpecificLandConfig = currentParkConfigKey ? (this.parkLandConfigs[currentParkConfigKey] || {}) : {};
 
-  // 1. Process rides nested under lands from API
-  if (apiData.lands && Array.isArray(apiData.lands)) {
-    apiData.lands.forEach(landFromApi => {
-      const apiLandNameLower = landFromApi.name.trim().toLowerCase();
-      const landConfig = currentParkSpecificLandConfig[apiLandNameLower] || {};
+        // 1. Process rides nested under lands from API
+        if (apiData.lands && Array.isArray(apiData.lands)) {
+            apiData.lands.forEach(landFromApi => {
+                const apiLandNameLower = landFromApi.name.trim().toLowerCase();
+                const landConfig = currentParkSpecificLandConfig[apiLandNameLower] || {}; // Get config for this specific land
+                
+                const currentLand = {
+                    name: landConfig.displayName || landFromApi.name || 'Unnamed Land',
+                    color: landConfig.color, // Use configured color
+                    rides: []
+                };
 
-      const currentLand = {
-        name: landConfig.displayName || landFromApi.name || 'Unnamed Land',
-        color: landConfig.color,
-        rides: []
-      };
-
-      if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
-        // ── Filter out any ride whose name includes "single rider" ──
-        landFromApi.rides
-          .filter(rideFromApi =>
-            !rideFromApi.name.toLowerCase().includes('single rider')
-          )
-          .forEach(rideFromApi => {
-            // build a unique rideId if none provided
-            const rideId = rideFromApi.id ||
-              `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
-
-            if (!processedRideIds.has(rideId)) {
-              currentLand.rides.push({
-                id: rideId,
-                name: rideFromApi.name,
-                waitTime: rideFromApi.is_open
-                  ? parseInt(rideFromApi.wait_time, 10)
-                  : null,
-                isOpen: rideFromApi.is_open === true,
-                lastUpdated: rideFromApi.last_updated
-                  ? new Date(rideFromApi.last_updated)
-                  : new Date(),
-                areaColor: landConfig.color
-              });
-              processedRideIds.add(rideId);
-            }
-          });
-      }
-
-      if (currentLand.rides.length > 0) {
-        displayData.lands.push(currentLand);
-      }
-    });
-  }
-
-  // 2. Process rides from the root apiData.rides array
-  let unlandedRides = [];
-  if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) {
-    const otherAttractionsConfigKey = 'other_attractions';
-    const otherAttractionsConfig =
-      currentParkSpecificLandConfig[otherAttractionsConfigKey] ||
-      this.parkLandConfigs[otherAttractionsConfigKey] || {};
-
-    apiData.rides
-      // ── Also filter out "single rider" here ──
-      .filter(rideFromApi =>
-        !rideFromApi.name.toLowerCase().includes('single rider')
-      )
-      .forEach(rideFromApi => {
-        const rideId = rideFromApi.id ||
-          `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
-
-        if (!processedRideIds.has(rideId)) {
-          unlandedRides.push({
-            id: rideId,
-            name: rideFromApi.name,
-            waitTime: rideFromApi.is_open
-              ? parseInt(rideFromApi.wait_time, 10)
-              : null,
-            isOpen: rideFromApi.is_open === true,
-            lastUpdated: rideFromApi.last_updated
-              ? new Date(rideFromApi.last_updated)
-              : new Date(),
-            areaColor: otherAttractionsConfig.color
-          });
-          processedRideIds.add(rideId);
+                if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
+                    landFromApi.rides.forEach(rideFromApi => {
+                        const rideId = rideFromApi.id || no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)};
+                        if (!processedRideIds.has(rideId)) {
+                            currentLand.rides.push({
+                                id: rideId,
+                                name: rideFromApi.name,
+                                waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+                                isOpen: rideFromApi.is_open === true,
+                                lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date(),
+                                areaColor: landConfig.color // Pass the land's color to the ride object
+                            });
+                            processedRideIds.add(rideId);
+                        }
+                    });
+                }
+                if (currentLand.rides.length > 0) {
+                    displayData.lands.push(currentLand);
+                }
+            });
         }
-      });
-  }
 
-  if (unlandedRides.length > 0) {
-    const otherAttractionsConfigKey = 'other_attractions';
-    const otherAttractionsConfig =
-      currentParkSpecificLandConfig[otherAttractionsConfigKey] ||
-      this.parkLandConfigs[otherAttractionsConfigKey] || {};
+        // 2. Process rides from the root apiData.rides array
+        let unlandedRides = [];
+        if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) {
+            const otherAttractionsConfigKey = 'other_attractions'; // Key in parkLandConfigs for generic styling
+            const otherAttractionsConfig = currentParkSpecificLandConfig[otherAttractionsConfigKey] || this.parkLandConfigs[otherAttractionsConfigKey] || {};
 
-    displayData.lands.push({
-      name: otherAttractionsConfig.displayName || 'Other Attractions',
-      color: otherAttractionsConfig.color,
-      rides: unlandedRides
-    });
-  }
 
-  // Sort lands and rides alphabetically by name
-  displayData.lands.sort((a, b) => a.name.localeCompare(b.name));
-  displayData.lands.forEach(land => {
-    land.rides.sort((a, b) => a.name.localeCompare(b.name));
-  });
+            apiData.rides.forEach(rideFromApi => {
+                const rideId = rideFromApi.id || no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)};
+                if (!processedRideIds.has(rideId)) {
+                    unlandedRides.push({
+                        id: rideId,
+                        name: rideFromApi.name,
+                        waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+                        isOpen: rideFromApi.is_open === true,
+                        lastUpdated: rideFromApi.last_updated ? new Date(rideFromApi.last_updated) : new Date(),
+                        areaColor: otherAttractionsConfig.color // Assign color for "Other Attractions"
+                    });
+                    processedRideIds.add(rideId);
+                }
+            });
+        }
+        if (unlandedRides.length > 0) {
+            const otherAttractionsConfigKey = 'other_attractions';
+            const otherAttractionsConfig = currentParkSpecificLandConfig[otherAttractionsConfigKey] || this.parkLandConfigs[otherAttractionsConfigKey] || {};
+            displayData.lands.push({ 
+                name: otherAttractionsConfig.displayName || "Other Attractions", 
+                color: otherAttractionsConfig.color, 
+                rides: unlandedRides 
+            });
+        }
+        
+        displayData.lands.sort((a, b) => a.name.localeCompare(b.name));
+        displayData.lands.forEach(land => {
+            land.rides.sort((a, b) => a.name.localeCompare(b.name));
+        });
 
-  return displayData;
-}
+        return displayData;
+    }
+    
     getWaitTimeClass(waitTime, isOpen) { 
         if (!isOpen) return 'closed';
         if (waitTime === null) return 'unknown'; 
@@ -512,4 +479,4 @@ class ParkWaitTimesApp {
 
 document.addEventListener('DOMContentLoaded', () => {
     new ParkWaitTimesApp();
-});
+});             
