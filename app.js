@@ -1,4 +1,4 @@
- // Universal Parks Wait Times Application (Refactored)
+// Universal Parks Wait Times Application (Refactored)
 class ParkWaitTimesApp {
     constructor() {
         this.supportedParks = [
@@ -479,4 +479,4 @@ class ParkWaitTimesApp {
 
 document.addEventListener('DOMContentLoaded', () => {
     new ParkWaitTimesApp();
-});             
+});
