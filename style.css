@@ -660,52 +660,16 @@ select.form-control {
 
 .app {
   min-height: 100vh;
-  /* --- MODIFICATION START --- */
-  background-image: linear-gradient(rgba(12, 12, 32, 0.7), rgba(26, 26, 58, 0.75)), url("EpicBackground.png"); /* Default background image with an overlay */
+  /* Use EpicBackground.png as a full-cover background */
+  background: url('EpicBackground.png') no-repeat center center fixed;
   background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  /* --- MODIFICATION END --- */
-  background-attachment: fixed; /* Keeps this background fixed during scroll */
   position: relative;
-  transition: background-image 0.5s ease-in-out; /* For smooth transitions if a class changes it */
 }
 
-/* This class is for Epic Universe specifically, which also uses EpicBackground.png.
-   If the default .app background is now THE SAME as Epic Universe's specific background,
-   this class might become redundant unless you want slightly different overlay gradients
-   or other properties for Epic Universe.
-   For now, we'll keep it, assuming the JavaScript might still apply it.
-   If you want Epic Universe to have a *different* gradient overlay than the default,
-   you'd adjust the linear-gradient here.
-*/
-.app-background-epic-universe {
-  background-image: linear-gradient(rgba(12, 12, 32, 0.8), rgba(26, 26, 58, 0.85)), url("EpicBackground.png"); /* Same image, potentially different overlay */
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
+/* Remove or comment out the .app::before starfield overlay entirely */
+/* .app::before { … } */
+/* .app > * { … } */
 
-/* Cosmic background effect - KEEP THIS AS IS for the star overlay */
-.app::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.2), transparent),
-    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.4), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.2), transparent);
-  background-repeat: repeat;
-  background-size: 200px 100px;
-  pointer-events: none;
-  z-index: 1; /* Above .app background, below .app > * content */
-}
 
 .app > * {
   position: relative;
