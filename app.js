@@ -103,7 +103,7 @@ class ParkWaitTimesApp {
 
     switchPark(parkId) {
         if (parkId === this.currentParkId || this.isLoading) return;
-        console.log(`Switching to park ID: ${parkId}`);
+        console.log(Switching to park ID: ${parkId});
 
         this.currentParkId = parkId;
         this.currentParkMeta = this.supportedParks.find(p => p.id === this.currentParkId);
@@ -139,10 +139,10 @@ class ParkWaitTimesApp {
         if (this.isLoading && !isManualRefresh) return;
         this.isLoading = true;
         this.showLoadingState();
-        console.log(`Fetching wait times for park ID: ${this.currentParkId}...`);
+        console.log(Fetching wait times for park ID: ${this.currentParkId}...);
         
         try {
-            const parkApiUrl = `https://queue-times.com/en-US/parks/${this.currentParkId}/queue_times.json`;
+            const parkApiUrl = https://queue-times.com/en-US/parks/${this.currentParkId}/queue_times.json;
             const proxiedUrl = this.apiConfig.proxyUrl + encodeURIComponent(parkApiUrl);
             console.log('Requesting URL:', proxiedUrl);
             
@@ -150,15 +150,15 @@ class ParkWaitTimesApp {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                let errorDetails = `HTTP error! status: ${response.status} ${response.statusText}`;
+                let errorDetails = HTTP error! status: ${response.status} ${response.statusText};
                 try {
                     const errorBody = await response.text(); 
                     console.error('Error response body:', errorBody);
                     try {
                         const errorJson = JSON.parse(errorBody); 
-                        errorDetails += ` - ${errorJson.message || JSON.stringify(errorJson)}`;
+                        errorDetails +=  - ${errorJson.message || JSON.stringify(errorJson)};
                     } catch (e) {
-                        errorDetails += ` - ${errorBody.substring(0, 100)}...`; 
+                        errorDetails +=  - ${errorBody.substring(0, 100)}...; 
                     }
                 } catch (e) { /* ignore */ }
                 throw new Error(errorDetails);
@@ -183,12 +183,14 @@ class ParkWaitTimesApp {
         }
     }
     
-    // …inside ParkWaitTimesApp…
-
-structureApiDataForDisplay(apiData) {
+    // This version processes all rides, including single rider lines as separate entries.
+    // It uses parkLandConfigs for land display names and colors.
+    structureApiDataForDisplay(apiData) {
   const displayData = { lands: [] };
   const processedRideIds = new Set();
-  const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
+  const currentParkConfigKey = this.currentParkMeta
+    ? this.currentParkMeta.themedAreasConfigKey
+    : null;
   const currentParkSpecificLandConfig = currentParkConfigKey
     ? (this.parkLandConfigs[currentParkConfigKey] || {})
     : {};
@@ -206,19 +208,23 @@ structureApiDataForDisplay(apiData) {
       };
 
       if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
-        // ─── Filter out any ride whose name includes “single rider” ───
+        // ── Filter out any ride whose name includes "single rider" ──
         landFromApi.rides
-          .filter(rideFromApi => 
+          .filter(rideFromApi =>
             !rideFromApi.name.toLowerCase().includes('single rider')
           )
           .forEach(rideFromApi => {
-            const rideId = rideFromApi.id
-              || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+            // build a unique rideId if none provided
+            const rideId = rideFromApi.id ||
+              `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+
             if (!processedRideIds.has(rideId)) {
               currentLand.rides.push({
                 id: rideId,
                 name: rideFromApi.name,
-                waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+                waitTime: rideFromApi.is_open
+                  ? parseInt(rideFromApi.wait_time, 10)
+                  : null,
                 isOpen: rideFromApi.is_open === true,
                 lastUpdated: rideFromApi.last_updated
                   ? new Date(rideFromApi.last_updated)
@@ -240,23 +246,26 @@ structureApiDataForDisplay(apiData) {
   let unlandedRides = [];
   if (apiData.rides && Array.isArray(apiData.rides) && apiData.rides.length > 0) {
     const otherAttractionsConfigKey = 'other_attractions';
-    const otherAttractionsConfig = currentParkSpecificLandConfig[otherAttractionsConfigKey]
-      || this.parkLandConfigs[otherAttractionsConfigKey]
-      || {};
+    const otherAttractionsConfig =
+      currentParkSpecificLandConfig[otherAttractionsConfigKey] ||
+      this.parkLandConfigs[otherAttractionsConfigKey] || {};
 
     apiData.rides
-      // ─── Also filter out “Single Rider” here ───
-      .filter(rideFromApi => 
+      // ── Also filter out "single rider" here ──
+      .filter(rideFromApi =>
         !rideFromApi.name.toLowerCase().includes('single rider')
       )
       .forEach(rideFromApi => {
-        const rideId = rideFromApi.id
-          || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+        const rideId = rideFromApi.id ||
+          `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
+
         if (!processedRideIds.has(rideId)) {
           unlandedRides.push({
             id: rideId,
             name: rideFromApi.name,
-            waitTime: rideFromApi.is_open ? parseInt(rideFromApi.wait_time, 10) : null,
+            waitTime: rideFromApi.is_open
+              ? parseInt(rideFromApi.wait_time, 10)
+              : null,
             isOpen: rideFromApi.is_open === true,
             lastUpdated: rideFromApi.last_updated
               ? new Date(rideFromApi.last_updated)
@@ -270,11 +279,12 @@ structureApiDataForDisplay(apiData) {
 
   if (unlandedRides.length > 0) {
     const otherAttractionsConfigKey = 'other_attractions';
-    const otherAttractionsConfig = currentParkSpecificLandConfig[otherAttractionsConfigKey]
-      || this.parkLandConfigs[otherAttractionsConfigKey]
-      || {};
+    const otherAttractionsConfig =
+      currentParkSpecificLandConfig[otherAttractionsConfigKey] ||
+      this.parkLandConfigs[otherAttractionsConfigKey] || {};
+
     displayData.lands.push({
-      name: otherAttractionsConfig.displayName || "Other Attractions",
+      name: otherAttractionsConfig.displayName || 'Other Attractions',
       color: otherAttractionsConfig.color,
       rides: unlandedRides
     });
@@ -288,6 +298,155 @@ structureApiDataForDisplay(apiData) {
 
   return displayData;
 }
+    getWaitTimeClass(waitTime, isOpen) { 
+        if (!isOpen) return 'closed';
+        if (waitTime === null) return 'unknown'; 
+        if (waitTime === 0) return 'low'; // Treat 0 min as low if open
+        if (waitTime <= 20) return 'low';
+        if (waitTime <= 45) return 'medium';
+        if (waitTime <= 75) return 'high';
+        return 'very-high';
+    }
+    
+    formatWaitTime(waitTime, isOpen) { 
+        if (!isOpen) return 'CLOSED';
+        if (waitTime === null) return 'N/A';
+        if (waitTime === 0) return 'No Wait';
+        return ${waitTime} min;
+    }
+    
+    renderWaitTimes() {
+        const container = this.elements.themedAreasContainer;
+        if (!container) {
+            console.error('Element with ID "themed-areas" not found for rendering.');
+            return;
+        }
+        container.innerHTML = '';
+        
+        if (!this.waitTimeData || !this.waitTimeData.lands || this.waitTimeData.lands.length === 0) {
+            container.innerHTML = '<p class="no-rides-message" style="text-align:center; padding: 20px; color: var(--color-text-secondary);">No ride data available for this park at the moment.</p>';
+            return;
+        }
+
+        this.waitTimeData.lands.forEach(landData => {
+            const areaKey = landData.name.toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '');
+            const areaElement = this.createThemedAreaElement(areaKey, landData);
+            container.appendChild(areaElement);
+        });
+    }
+    
+    createThemedAreaElement(areaKey, landData) {
+        const areaDiv = document.createElement('div');
+        areaDiv.className = themed-area themed-area--${areaKey};
+        if (landData.color) {
+            areaDiv.style.borderColor = landData.color;
+        } else {
+            areaDiv.style.borderColor = 'rgba(255, 255, 255, 0.2)'; 
+        }
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'area-header';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'area-icon';
+        if (landData.color) {
+            iconDiv.style.backgroundColor = landData.color; 
+        } else {
+             iconDiv.style.backgroundColor = 'var(--color-text-secondary)';
+        }
+        
+        const titleH2 = document.createElement('h2');
+        titleH2.className = 'area-title';
+        titleH2.textContent = landData.name; 
+        
+        headerDiv.appendChild(iconDiv);
+        headerDiv.appendChild(titleH2);
+        
+        const attractionsGrid = document.createElement('div');
+        attractionsGrid.className = 'attractions-grid';
+        
+        if (landData.rides && landData.rides.length > 0) {
+            landData.rides.forEach(rideData => {
+                const attractionCard = this.createAttractionCard(rideData);
+                attractionsGrid.appendChild(attractionCard);
+            });
+        } else {
+            const noRidesMsg = document.createElement('p');
+            noRidesMsg.textContent = 'No specific ride data in this area currently.';
+            noRidesMsg.className = 'no-rides-in-area-message';
+            attractionsGrid.appendChild(noRidesMsg);
+        }
+        
+        areaDiv.appendChild(headerDiv);
+        areaDiv.appendChild(attractionsGrid);
+        return areaDiv;
+    }
+    
+    // This createAttractionCard version does NOT include the single rider sticker logic
+    createAttractionCard(rideData) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'attraction-card';
+         if (!rideData.isOpen) {
+            cardDiv.classList.add('attraction-card--closed');
+        }
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'attraction-header';
+        
+        const nameH3 = document.createElement('h3');
+        nameH3.className = 'attraction-name';
+        nameH3.textContent = rideData.name;
+        
+        const waitTimeDisplayDiv = document.createElement('div');
+        waitTimeDisplayDiv.className = 'wait-time-display';
+        
+        const waitTimeSpan = document.createElement('span');
+        const waitTimeClass = this.getWaitTimeClass(rideData.waitTime, rideData.isOpen);
+        waitTimeSpan.className = wait-time wait-time--${waitTimeClass};
+        waitTimeSpan.textContent = this.formatWaitTime(rideData.waitTime, rideData.isOpen);
+        
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'attraction-status';
+        
+        const statusIndicator = document.createElement('div');
+        const statusClass = rideData.isOpen ? 'open' : 'closed'; 
+        statusIndicator.className = status-indicator status-indicator--${statusClass};
+        if (rideData.isOpen && rideData.waitTime === null) { 
+            statusIndicator.classList.remove(status-indicator--${statusClass});
+            statusIndicator.classList.add('status-indicator--unknown');
+        }
+        
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot';
+        
+        const statusText = document.createElement('span');
+        statusText.className = 'status-text'; 
+        statusText.textContent = rideData.isOpen ? 'Open' : 'Closed';
+        if (rideData.isOpen && rideData.waitTime === null) statusText.textContent = 'N/A';
+        
+        statusIndicator.appendChild(statusDot);
+        statusIndicator.appendChild(statusText);
+        statusDiv.appendChild(statusIndicator);
+        
+        if (rideData.lastUpdated) { 
+            const lastUpdatedRideSpan = document.createElement('span');
+            lastUpdatedRideSpan.className = 'ride-last-updated'; 
+            lastUpdatedRideSpan.textContent = Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })};
+            statusDiv.appendChild(lastUpdatedRideSpan);
+        }
+        
+        waitTimeDisplayDiv.appendChild(waitTimeSpan);
+        waitTimeDisplayDiv.appendChild(statusDiv);
+        
+        headerDiv.appendChild(nameH3);
+        headerDiv.appendChild(waitTimeDisplayDiv);
+        
+        cardDiv.appendChild(headerDiv);
+        return cardDiv;
+    }
+    
     showLoadingState() {
         if(this.elements.loadingState) this.elements.loadingState.classList.remove('hidden');
         if(this.elements.errorState) this.elements.errorState.classList.add('hidden');
@@ -325,7 +484,7 @@ structureApiDataForDisplay(apiData) {
         
         this.autoRefreshInterval = setInterval(() => {
             if (!this.isLoading && document.visibilityState === 'visible' && this.currentParkId) { 
-                console.log(`Auto-refreshing wait times for park ID: ${this.currentParkId}`);
+                console.log(Auto-refreshing wait times for park ID: ${this.currentParkId});
                 this.fetchWaitTimes();
             }
         }, this.autoRefreshTime);
@@ -340,7 +499,7 @@ structureApiDataForDisplay(apiData) {
             }
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const timeString = ${minutes}:${seconds.toString().padStart(2, '0')};
             if (this.elements.countdownDisplay) {
                 this.elements.countdownDisplay.textContent = timeString;
             }
