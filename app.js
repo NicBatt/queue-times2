@@ -183,13 +183,18 @@ class ParkWaitTimesApp {
         }
     }
     
-    // This version processes all rides, including single rider lines as separate entries.
+    // This version processes all rides, excluding single rider lines as separate entries.
     // It uses parkLandConfigs for land display names and colors.
     structureApiDataForDisplay(apiData) {
         const displayData = { lands: [] };
         const processedRideIds = new Set(); 
         const currentParkConfigKey = this.currentParkMeta ? this.currentParkMeta.themedAreasConfigKey : null;
         const currentParkSpecificLandConfig = currentParkConfigKey ? (this.parkLandConfigs[currentParkConfigKey] || {}) : {};
+
+        // Helper function to filter out "single rider" rides
+        const filterSingleRider = (ride) => {
+            return !ride.name.toLowerCase().includes("single rider");
+        };
 
         // 1. Process rides nested under lands from API
         if (apiData.lands && Array.isArray(apiData.lands)) {
@@ -204,7 +209,7 @@ class ParkWaitTimesApp {
                 };
 
                 if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
-                    landFromApi.rides.forEach(rideFromApi => {
+                    landFromApi.rides.filter(filterSingleRider).forEach(rideFromApi => { // Apply filter here
                         const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
                         if (!processedRideIds.has(rideId)) {
                             currentLand.rides.push({
@@ -231,8 +236,7 @@ class ParkWaitTimesApp {
             const otherAttractionsConfigKey = 'other_attractions'; // Key in parkLandConfigs for generic styling
             const otherAttractionsConfig = currentParkSpecificLandConfig[otherAttractionsConfigKey] || this.parkLandConfigs[otherAttractionsConfigKey] || {};
 
-
-            apiData.rides.forEach(rideFromApi => {
+            apiData.rides.filter(filterSingleRider).forEach(rideFromApi => { // Apply filter here
                 const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
                 if (!processedRideIds.has(rideId)) {
                     unlandedRides.push({
@@ -355,7 +359,7 @@ class ParkWaitTimesApp {
     createAttractionCard(rideData) {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'attraction-card';
-         if (!rideData.isOpen) {
+           if (!rideData.isOpen) {
             cardDiv.classList.add('attraction-card--closed');
         }
         
@@ -462,7 +466,7 @@ class ParkWaitTimesApp {
         let timeLeft = this.autoRefreshTime / 1000;
         const updateCountdown = () => {
             if (timeLeft < 0) { 
-                 timeLeft = this.autoRefreshTime / 1000; 
+                timeLeft = this.autoRefreshTime / 1000; 
             }
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
