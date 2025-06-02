@@ -103,7 +103,7 @@ class ParkWaitTimesApp {
 
     switchPark(parkId) {
         if (parkId === this.currentParkId || this.isLoading) return;
-        console.log(Switching to park ID: ${parkId});
+        console.log(`Switching to park ID: ${parkId}`);
 
         this.currentParkId = parkId;
         this.currentParkMeta = this.supportedParks.find(p => p.id === this.currentParkId);
@@ -139,10 +139,10 @@ class ParkWaitTimesApp {
         if (this.isLoading && !isManualRefresh) return;
         this.isLoading = true;
         this.showLoadingState();
-        console.log(Fetching wait times for park ID: ${this.currentParkId}...);
+        console.log(`Fetching wait times for park ID: ${this.currentParkId}...`);
         
         try {
-            const parkApiUrl = https://queue-times.com/en-US/parks/${this.currentParkId}/queue_times.json;
+            const parkApiUrl = `https://queue-times.com/en-US/parks/${this.currentParkId}/queue_times.json`;
             const proxiedUrl = this.apiConfig.proxyUrl + encodeURIComponent(parkApiUrl);
             console.log('Requesting URL:', proxiedUrl);
             
@@ -150,15 +150,15 @@ class ParkWaitTimesApp {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                let errorDetails = HTTP error! status: ${response.status} ${response.statusText};
+                let errorDetails = `HTTP error! status: ${response.status} ${response.statusText}`;
                 try {
                     const errorBody = await response.text(); 
                     console.error('Error response body:', errorBody);
                     try {
                         const errorJson = JSON.parse(errorBody); 
-                        errorDetails +=  - ${errorJson.message || JSON.stringify(errorJson)};
+                        errorDetails += ` - ${errorJson.message || JSON.stringify(errorJson)}`;
                     } catch (e) {
-                        errorDetails +=  - ${errorBody.substring(0, 100)}...; 
+                        errorDetails += ` - ${errorBody.substring(0, 100)}...`; 
                     }
                 } catch (e) { /* ignore */ }
                 throw new Error(errorDetails);
@@ -205,7 +205,7 @@ class ParkWaitTimesApp {
 
                 if (landFromApi.rides && Array.isArray(landFromApi.rides)) {
                     landFromApi.rides.forEach(rideFromApi => {
-                        const rideId = rideFromApi.id || no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)};
+                        const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
                         if (!processedRideIds.has(rideId)) {
                             currentLand.rides.push({
                                 id: rideId,
@@ -233,7 +233,7 @@ class ParkWaitTimesApp {
 
 
             apiData.rides.forEach(rideFromApi => {
-                const rideId = rideFromApi.id || no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)};
+                const rideId = rideFromApi.id || `no-id-${rideFromApi.name.replace(/\s/g, '')}-${Math.random().toString(36).substr(2, 5)}`;
                 if (!processedRideIds.has(rideId)) {
                     unlandedRides.push({
                         id: rideId,
@@ -279,7 +279,7 @@ class ParkWaitTimesApp {
         if (!isOpen) return 'CLOSED';
         if (waitTime === null) return 'N/A';
         if (waitTime === 0) return 'No Wait';
-        return ${waitTime} min;
+        return `${waitTime} min`;
     }
     
     renderWaitTimes() {
@@ -306,7 +306,7 @@ class ParkWaitTimesApp {
     
     createThemedAreaElement(areaKey, landData) {
         const areaDiv = document.createElement('div');
-        areaDiv.className = themed-area themed-area--${areaKey};
+        areaDiv.className = `themed-area themed-area--${areaKey}`;
         if (landData.color) {
             areaDiv.style.borderColor = landData.color;
         } else {
@@ -371,7 +371,7 @@ class ParkWaitTimesApp {
         
         const waitTimeSpan = document.createElement('span');
         const waitTimeClass = this.getWaitTimeClass(rideData.waitTime, rideData.isOpen);
-        waitTimeSpan.className = wait-time wait-time--${waitTimeClass};
+        waitTimeSpan.className = `wait-time wait-time--${waitTimeClass}`;
         waitTimeSpan.textContent = this.formatWaitTime(rideData.waitTime, rideData.isOpen);
         
         const statusDiv = document.createElement('div');
@@ -379,9 +379,9 @@ class ParkWaitTimesApp {
         
         const statusIndicator = document.createElement('div');
         const statusClass = rideData.isOpen ? 'open' : 'closed'; 
-        statusIndicator.className = status-indicator status-indicator--${statusClass};
+        statusIndicator.className = `status-indicator status-indicator--${statusClass}`;
         if (rideData.isOpen && rideData.waitTime === null) { 
-            statusIndicator.classList.remove(status-indicator--${statusClass});
+            statusIndicator.classList.remove(`status-indicator--${statusClass}`);
             statusIndicator.classList.add('status-indicator--unknown');
         }
         
@@ -400,7 +400,7 @@ class ParkWaitTimesApp {
         if (rideData.lastUpdated) { 
             const lastUpdatedRideSpan = document.createElement('span');
             lastUpdatedRideSpan.className = 'ride-last-updated'; 
-            lastUpdatedRideSpan.textContent = Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })};
+            lastUpdatedRideSpan.textContent = `Updated: ${new Date(rideData.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
             statusDiv.appendChild(lastUpdatedRideSpan);
         }
         
@@ -451,7 +451,7 @@ class ParkWaitTimesApp {
         
         this.autoRefreshInterval = setInterval(() => {
             if (!this.isLoading && document.visibilityState === 'visible' && this.currentParkId) { 
-                console.log(Auto-refreshing wait times for park ID: ${this.currentParkId});
+                console.log(`Auto-refreshing wait times for park ID: ${this.currentParkId}`);
                 this.fetchWaitTimes();
             }
         }, this.autoRefreshTime);
@@ -466,7 +466,7 @@ class ParkWaitTimesApp {
             }
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            const timeString = ${minutes}:${seconds.toString().padStart(2, '0')};
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             if (this.elements.countdownDisplay) {
                 this.elements.countdownDisplay.textContent = timeString;
             }
