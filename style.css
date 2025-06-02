@@ -705,7 +705,6 @@ select.form-control {
   background: linear-gradient(45deg, #4FC3F7, #29B6F6, #03A9F4);
   background-clip: text;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
 }
 
