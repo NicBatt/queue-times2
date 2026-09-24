@@ -37,11 +37,11 @@ class ParkWaitTimesApp {
             'other_attractions': { color: '#777777', displayName: 'Other Attractions / Events'}
         };
 
-        this.currentParkId = this.supportedParks[0].id; // Default to first park
+        this.currentParkId = this.supportedParks[0].id; // Defaultto first park
         this.currentParkMeta = this.supportedParks.find(p => p.id === this.currentParkId);
 
         this.apiConfig = {
-            proxyUrl: 'https://corsproxy.io/?url=',
+            ⁠proxyUrl: '[https://api.allorigins.win/raw?url=](https://api.allorigins.win/raw?url=)'⁠,
         };
         
         this.waitTimeData = { lands: [] };
