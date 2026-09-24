@@ -41,7 +41,7 @@ class ParkWaitTimesApp {
         this.currentParkMeta = this.supportedParks.find(p => p.id === this.currentParkId);
 
         this.apiConfig = {
-        proxyUrl: 'https://corsproxy.io/?key=1ccd4391&url=',
+        proxyUrl: 'https://api.allorigins.win/raw?url=',
         };
         
         this.waitTimeData = { lands: [] };
