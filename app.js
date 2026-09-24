@@ -4,7 +4,7 @@ class ParkWaitTimesApp {
         this.supportedParks = [
             { id: 64, name: "Islands of Adventure", shortName: "Islands", themedAreasConfigKey: "ioa" },
             { id: 65, name: "Universal Studios Florida", shortName: "Studios", themedAreasConfigKey: "usf" },
-            { id: 334, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" } // Verify ID
+            { id: 12, name: "Epic Universe", shortName: "Epic", themedAreasConfigKey: "epic_universe" } // Verify ID
         ];
 
         this.parkLandConfigs = {
